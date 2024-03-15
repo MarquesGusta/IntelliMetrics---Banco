@@ -228,6 +228,64 @@ BEGIN
 END // 
 DELIMITER ;
 
+-- inserção de planeza
+
+
+-- alteração de planeza
+
+
+-- inserção de paralelismo do micrômetro
+
+
+-- alteração de paralelismo do micrômetro
+
+
+-- inserção de controle dimensional
+
+
+-- alteração de controle dimensional
+
+
+-- inserção de resultados do micrômetro
+
+
+-- alteração de resultados do micrômetro
+
+
+-- inserção de mdeições internas
+
+
+-- alteração de mdeições internas
+
+
+-- inserção de medições de ressaltos
+
+
+-- alteração de medições de ressaltos
+
+
+-- inserção de medições de profundidades
+
+
+-- alteração de medições de profundidades
+
+
+-- inserção de paralelismo do micrômetro
+
+
+-- alteração de paralelismo do micrômetro
+
+
+-- inserção de medicoes externas
+
+
+-- alteração de medicoes externas
+
+
+-- inserção de resultados dos paquímetros
+
+
+-- alteração de resultados dos paquímetros
 
 -- criação de certificados
 DELIMITER //

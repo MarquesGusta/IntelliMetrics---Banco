@@ -78,7 +78,27 @@ CREATE TABLE instrumentos(
     FOREIGN KEY(fk_idTipo) REFERENCES tipos(pk_idTipo)
 );
 
--- CREATE TABLE certificados();
+-- CREATE TABLE planeza();
+
+-- CREATE TABLE paralelismoMicro();
+
+-- CREATE TABLE controleDimensional();
+
+-- CREATE TABLE resultadosMicrometros();
+
+-- CREATE TABLE medicoesInternas();
+
+-- CREATE TABLE medicoesRessaltos();
+
+-- CREATE TABLE medicoesProfundidades();
+
+-- CREATE TABLE paralelismoPaq();
+
+-- CREATE TABLE medicoesExternas();
+
+-- CREATE TABLE resultadosPaquimetros();
+
+-- CREATE TABLE certificados();  // conversar com o professor de apenas colocar o id do instrumento e o número do certificado
 
 CREATE TABLE ordensMedicao(
 	pk_idOSMedicao int PRIMARY KEY NOT NULL,
