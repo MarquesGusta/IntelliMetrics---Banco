@@ -145,37 +145,41 @@ DELIMITER ;
 call reativarCliente(1);
 
 
--- criação de ordem de calibração
+-- criação de ordem de serviço
 DELIMITER //
-CREATE PROCEDURE criarOsCalibracao(
+CREATE PROCEDURE criarOrdens(
 	IN novaOrdem int,
 	IN idCliente int,
     IN idUsuario int,
     IN novoTitulo varchar(30),
+    IN novoTipo enum("calibracao", "medicao"),
     IN novaDescricao varchar(150),
     IN novaDataInicio date,
     IN novaDataTermino date,
     IN novoContratante varchar(60),
     IN novoEmail varchar(60),
-    IN novoTelefone varchar(11)
+    IN novoTelefone varchar(11),
+    IN novoStatus enum("em espera", "concluida")
 )
 BEGIN
-	INSERT INTO ordensCalibracao(pk_idOsCalibracao, fk_idCliente, fk_idUsuario, titulo, descricao, dataInicio, dataTermino, contratante, email, telefone)
-    VALUES (novaOrdem, idCliente, idUsuario, novoTitulo, novaDescricao, novaDataInicio, novaDataTermino, novoContratante, novoEmail, novoTelefone);
+	INSERT INTO ordensServico(pk_idOs, fk_idCliente, fk_idUsuario, titulo, tipo, descricao, dataInicio, dataTermino, contratante, email, telefone, status)
+    VALUES (novaOrdem, idCliente, idUsuario, novoTitulo, novoTipo, novaDescricao, novaDataInicio, novaDataTermino, novoContratante, novoEmail, novoTelefone, novoStatus);
 END // 
 DELIMITER ;
-call criarOsCalibracao(556, 1, 1, "Arregaça ai esse paquímetro", "Paquímetro ta com defeito", curdate(), '2024-03-27', "Bill Gates", "gatesbill@gmail.com", 11902345567);
-select * from ordensCalibracao;
+call criarOrdens(556, 1, 1, "Arregaça ai esse paquímetro", "calibracao", "Paquímetro ta com defeito", curdate(), '2024-03-27', "Bill Gates", "gatesbill@gmail.com", 11902345567, "em espera");
+select * from ordensServico;
+drop procedure criarOrdens;
 
 
--- alteração de ordem de calibração
+-- alteração de ordem de serviço
 DELIMITER //
-CREATE PROCEDURE modificarOsCalibracao(
+CREATE PROCEDURE modificarOrdem(
 	IN idAntigo int,
 	IN alterarOrdem int,
 	IN alterarCliente int,
     IN alterarUsuario int,
     IN alterarTitulo varchar(30),
+    IN alterarTipo enum("calibracao", "medicao"),
     IN alterarDescricao varchar(150),
     IN alterarDataTermino date,
     IN alterarContratante varchar(60),
@@ -183,20 +187,50 @@ CREATE PROCEDURE modificarOsCalibracao(
     IN alterarTelefone varchar(11)
 )
 BEGIN
-	UPDATE ordensCalibracao
-    SET pk_idOsCalibracao = alterarOrdem,
+	UPDATE ordensServico
+    SET pk_idOs = alterarOrdem,
     fk_idCliente = alterarCliente,
     fk_idUsuario = alterarUsuario,
     titulo = alterarTitulo,
+    tipo = alterarTipo,
     descricao = alterarDescricao,
     dataTermino = alterarDataTermino,
     contratante = alterarContratante,
     email = alterarEmail,
     telefone = alterarTelefone
-    WHERE pk_idOsCalibracao = idAntigo;
+    WHERE pk_idOs = idAntigo;
 END // 
 DELIMITER ;
-call modificarOsCalibracao(556, 45, 1, 1, "banana", "cabou banana", '2024-04-27', "Bill Gates", "gatesbill@gmail.com", 11902345567);
+call modificarOrdem(556, 45, 1, 1, "banana", "medicao", "cabou banana", '2024-04-27', "Bill Gates", "gatesbill@gmail.com", 11902345567);
+select * from ordensServico;
+
+
+-- marcar ordem de serviço como concluída
+DELIMITER //
+CREATE PROCEDURE concluirOrdem(
+	IN idOrdem int
+)
+BEGIN
+	UPDATE ordensServico
+    SET status = "concluida"
+    WHERE pk_idOs = idOrdem;
+END // 
+DELIMITER ;
+call concluirOrdem(45);
+
+
+-- desmarcar ordem de serviço como concluída
+DELIMITER //
+CREATE PROCEDURE desmarcarOrdemComoConcluida(
+	IN idOrdem int
+)
+BEGIN
+	UPDATE ordensServico
+    SET status = "em espera"
+    WHERE pk_idOs = idOrdem;
+END // 
+DELIMITER ;
+call desmarcarOrdemComoConcluida(45);
 
 
 -- criação de categorias
@@ -264,20 +298,24 @@ call modificarTipo(1, 1, "sapatu");
 DELIMITER //
 CREATE PROCEDURE cadastrarInstrumento(
     IN idCliente int,
-    IN idOsCalibracao int,
+    IN idOrdem int,
     IN idTipo int,
     IN novoNSerie int,
+    IN novaIdentificacaoCliente int,
     IN novoFabricante varchar(60),
-    IN novaResolucao int,
-    IN novaUnidadeMedida enum('mm', 'cm', 'pol'),
-    IN novaFaixaNominal varchar(30)
+	IN novaFaixaNominalNum decimal(3,2),
+    IN novaFaixaNominalUnidade enum('mm', 'pol'),
+    IN novaFaixaCalibradaNum decimal(3,2),
+    IN novaFaixaCalibradaUni enum('mm', 'pol'),
+    IN novaDivisaoNum decimal(3,2),
+    IN novaDivisaoUni enum('mm', 'pol')
 )
 BEGIN
-    INSERT INTO instrumentos(fk_idCliente, fk_idOsCalibracao, fk_idTipo, nSerie, fabricante, resolucao, unidadeMedida, faixaNominal)
-    VALUES (idCliente, idOsCalibracao, idTipo, novoNSerie, novoFabricante, novaResolucao, novaUnidadeMedida, novaFaixaNominal);
+    INSERT INTO instrumentos(fk_idCliente, fk_idOs, fk_idTipo, nSerie, identificacaoCliente, fabricante, faixaNominalNum, faixaNominalUni, faixaCalibradaNum, faixaCalibradaUni, divisaoResolucaoNum, divisaoResolucaoUni)
+    VALUES (idCliente, idOrdem, idTipo, novoNSerie, novaIdentificacaoCliente, novoFabricante, novaFaixaNominalNum, novaFaixaNominalUnidade, novaFaixaCalibradaNum, novaFaixaCalibradaUni, novaDivisaoNum, novaDivisaoUni);
 END //
 DELIMITER ;
-call cadastrarInstrumento(1, 45, 1, 112233, "Martelos e machados", 230, "pol", "AAAAAAAA");
+call cadastrarInstrumento(1, 556, 1, 112233, 1222333,  "Martelos e machados", 1.2, "mm", 5, "pol", 2.43, "mm");
 select * from instrumentos;
 
 
@@ -289,77 +327,339 @@ CREATE PROCEDURE modificarInstrumento(
     IN idOsCalibracao INT,
     IN idTipo INT,
     IN alterarNSerie INT,
+	IN alterarIdentificacaoCliente int,
     IN alterarFabricante VARCHAR(60),
-    IN alterarResolucao INT,
-    IN alterarUnidadeMedida ENUM('mm', 'cm', 'pol'),
-    IN alterarFaixaNominal VARCHAR(30)
+    IN alterarFaixaNominalNum decimal(3,2),
+    IN alterarFaixaNominalUnidade enum('mm', 'pol'),
+    IN alterarFaixaCalibradaNum decimal(3,2),
+    IN alterarFaixaCalibradaUni enum('mm', 'pol'),
+    IN alterarDivisaoNum decimal(3,2),
+    IN alterarDivisaoUni enum('mm', 'pol')
 )
 BEGIN
     UPDATE instrumentos
     SET fk_idCliente = idCliente,
-    fk_idOsCalibracao = idOsCalibracao,
+    fk_idOs = idOsCalibracao,
     fk_idTipo = idTipo,
     nSerie = alterarNSerie,
+    identificacaoCliente = alterarIdentificacaoCliente,
 	fabricante = alterarFabricante,
-    resolucao = alterarResolucao,
-    unidadeMedida = alterarUnidadeMedida,
-    faixaNominal = alterarFaixaNominal
+    faixaNominalNum = alterarFaixaNominalNum,
+    faixaNominalUni = alterarFaixaNominalUnidade,
+    faixaCalibradaNum = alterarFaixaCalibradaNum,
+    faixaCalibradaUni = alterarFaixaCalibradaUni,
+    divisaoResolucaoNum = alterarDivisaoNum,
+    divisaoResolucaoUni = alterarDivisaoUni
     WHERE pk_idinstrumento = idInstrumento;
 END //
 DELIMITER ;
-call modificarInstrumento(3, 1, 45, 1, 112233, "Machados e Martelos", 230, "cm", "bbbbbbb");
+call modificarInstrumento(2, 1, 556, 1, 112233, 111232, "Machados e Martelos", 2.21, "pol", 2, "mm", 5.32, "mm");
 
 
 -- inserção de instrumentos recebidos
 DELIMITER //
 CREATE PROCEDURE inserirInstrumentoRecebido(
-    IN idOsCalibracao int,
+    IN idOrdem int,
+    IN idUsuario int,
     IN novoSetor varchar(30),
     IN novoNProposta int,
     IN novoNumNotaFiscal int,
-    IN novaDataRecebimento date
+    IN novaDataRecebimento date,
+    IN novoRecebidoPrevisao enum("sim", "nao"),
+    IN novaPrevisaoInicio date,
+    IN novaPrevisaoTermino date,
+    IN novoClienteConcorda enum("sim", "nao"),
+    IN dataAssinatura date
 )
 BEGIN
-    INSERT INTO instrumentosRecebidos(fk_idOsCalibracao, setor, nProposta, nNotaFiscal, dataDeRecebimento)
-    VALUES (idOsCalibracao, novoSetor, novoNProposta, novoNumNotaFiscal, novaDataRecebimento);
+    INSERT INTO instrumentosRecebidos(fk_idOs, fk_idUsuario, setor, nProposta, nNotaFiscal, dataDeRecebimento, recebidoNaPrevisao, previsaoInicio, previsaoTermino, clienteConcorda, dataAssinatura)
+    VALUES (idOrdem, idUsuario, novoSetor, novoNProposta, novoNumNotaFiscal, novaDataRecebimento, novoRecebidoPrevisao, novaPrevisaoInicio, novaPrevisaoTermino, novoClienteConcorda, dataAssinatura);
 END //
 DELIMITER ;
-call inserirInstrumentoRecebido(45, "marketing", 12341, 12344563, '2024-03-27');
+call inserirInstrumentoRecebido(556, 1, "marketing", 12341, 12344563, '2024-03-27', "sim", null, null, "sim", '2024-03-28');
 select * from instrumentosRecebidos;
 
 
 -- alteração de instrumentos recebidos
 DELIMITER //
-CREATE PROCEDURE criarLista(
-
+CREATE PROCEDURE modificarInstrumentosRecebidos(
+	IN idRecebimento int,
+	IN idOrdem int,
+    IN alterarSetor varchar(30),
+    IN alterarNProposta int,
+    IN alterarNumNotaFiscal int,
+    IN alterarDataRecebimento date,
+    IN alterarRecebidoPrevisao enum("sim", "nao"),
+    IN alterarPrevisaoInicio date,
+    IN alterarPrevisaoTermino date,
+    IN alterarClienteConcorda enum("sim", "nao"),
+    IN alterarDataAssinatura date
 )
 BEGIN
-
+	UPDATE instrumentosRecebidos
+    SET fk_idOs = idOrdem,
+    setor = alterarSetor,
+    nProposta = alterarNProposta,
+    nNotaFiscal = alterarNumNotaFiscal,
+    dataDeRecebimento = alterarDataRecebimento,
+    recebidoNaPrevisao = alterarRecebidoPrevisao,
+    previsaoInicio = alterarPrevisaoInicio,
+    previsaoTermino = alterarPrevisaoTermino,
+    clienteConcorda = alterarClienteConcorda,
+    dataAssinatura = alterarDataAssinatura
+    WHERE pk_idinstrumentoRecebido = idRecebimento;
 END // 
 DELIMITER ;
+call modificarInstrumentosRecebidos(1, 556, "comercial", 12341, 12344563, '2024-03-27', "sim", '2024-04-25', '2024-05-21', "sim", '2024-03-28');
+
 
 -- inserção de planeza
+DELIMITER //
+CREATE PROCEDURE criarPlaneza(
+	IN novoCMovel1 decimal(6,3),
+	IN novoCMovel2 decimal(6,3),
+	IN novoCMovel3 decimal(6,3),
+	IN novoCFixo1 decimal(6,3),
+	IN novoCFixo2 decimal(6,3),
+	IN novoCFixo3 decimal(6,3)
+)
+BEGIN
+	INSERT INTO planeza (cMovel1, cMovel2, cMovel3, cFixo1 , cFixo2, cFixo3 )
+    VALUES (novoCMovel1, novoCMovel2, novoCMovel3, novoCFixo1, novoCFixo2, novoCFixo3);
+END // 
+DELIMITER ;
+call criarPlaneza(891.222, 892.322, 893.422, 894.522, 895.622, 896.722);
+select * from planeza;
 
 
 -- alteração de planeza
+DELIMITER //
+CREATE PROCEDURE modificarPlaneza(
+	IN idPlaneza int,
+	IN alterarCMovel1 decimal(6,3),
+	IN alterarCMovel2 decimal(6,3),
+	IN alterarCMovel3 decimal(6,3),
+	IN alterarCFixo1 decimal(6,3),
+	IN alterarCFixo2 decimal(6,3),
+	IN alterarCFixo3 decimal(6,3)
+)
+BEGIN
+	UPDATE planeza
+    SET cMovel1 = alterarCMovel1,
+	cMovel2 = alterarCMovel2,
+	cMovel3 = alterarCMovel3,
+	cFixo1 = alterarCFixo1,
+	cFixo2 = alterarCFixo2,
+	cFixo3 = alterarCFixo3
+    WHERE pk_idPlaneza = idPlaneza;
+END // 
+DELIMITER ;
+call modificarPlaneza(3, 1, 2, 3, 4, 5, 6);
 
 
 -- inserção de paralelismo do micrômetro
+DELIMITER //
+CREATE PROCEDURE criarParalelismoMicro(
+    IN novovalorNominal1 decimal(6,3),
+    IN novovalorNominal2 decimal(6,3),
+    IN novovalorNominal3 decimal(6,3),
+    IN novovalorNominal4 decimal(6,3),
+    IN novocMovelcFixo1 decimal(6,3),
+    IN novocMovelcFixo2 decimal(6,3),
+    IN novocMovelcFixo3 decimal(6,3),
+    IN novocMovelcFixo4 decimal(6,3),
+    IN novocMovelcFixo5 decimal(6,3)
+)
+BEGIN
+	INSERT INTO paralelismoMicro(valorNominal1, valorNominal2, valorNominal3, valorNominal4, cMovelcFixo1, cMovelcFixo2, cMovelcFixo3, cMovelcFixo4, cMovelcFixo5)
+    VALUES (novovalorNominal1, novovalorNominal2, novovalorNominal3, novovalorNominal4, novocMovelcFixo1, novocMovelcFixo2, novocMovelcFixo3, novocMovelcFixo4, novocMovelcFixo5);
+END // 
+DELIMITER ;
+call criarParalelismoMicro(1.2, 2.3, 3.4, 4.5, 5.6, 6.7, 7.8, 8.9, 9.0);
+select * from paralelismoMicro;
 
 
 -- alteração de paralelismo do micrômetro
+DELIMITER //
+CREATE PROCEDURE modificarParalelismoMicro(
+	IN idParalelismo int,
+	IN novovalorNominal1 decimal(6,3),
+    IN novovalorNominal2 decimal(6,3),
+    IN novovalorNominal3 decimal(6,3),
+    IN novovalorNominal4 decimal(6,3),
+    IN novocMovelcFixo1 decimal(6,3),
+    IN novocMovelcFixo2 decimal(6,3),
+    IN novocMovelcFixo3 decimal(6,3),
+    IN novocMovelcFixo4 decimal(6,3),
+    IN novocMovelcFixo5 decimal(6,3)
+)
+BEGIN
+	UPDATE paralelismoMicro
+    SET valorNominal1 = novovalorNominal1,
+    valorNominal2 = novovalorNominal2,
+    valorNominal3 = novovalorNominal3,
+    valorNominal4 = novovalorNominal4,
+    cMovelcFixo1 = novocMovelcFixo1,
+    cMovelcFixo2 = novocMovelcFixo2,
+    cMovelcFixo3 = novocMovelcFixo3,
+    cMovelcFixo4 = novocMovelcFixo4,
+    cMovelcFixo5 = novocMovelcFixo5
+    WHERE pk_idParalelismoMicro = idParalelismo;
+END // 
+DELIMITER ;
+call modificarParalelismoMicro(1, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9);
 
 
 -- inserção de controle dimensional
+DELIMITER //
+CREATE PROCEDURE criarControleDimensional(
+	IN novovp0_0_1 decimal(6,3),
+	IN novovp0_0_2 decimal(6,3),
+	IN novovp0_0_3 decimal(6,3),
+	IN novovp2_5_1 decimal(6,3),
+	IN novovp2_5_2 decimal(6,3),
+	IN novovp2_5_3 decimal(6,3),
+	IN novovp5_1_1 decimal(6,3),
+	IN novovp5_1_2 decimal(6,3),
+	IN novovp5_1_3 decimal(6,3),
+	IN novovp7_7_1 decimal(6,3),
+	IN novovp7_7_2 decimal(6,3),
+	IN novovp7_7_3 decimal(6,3),
+	IN novovp10_3_1 decimal(6,3),
+	IN novovp10_3_2 decimal(6,3),
+	IN novovp10_3_3 decimal(6,3),
+	IN novovp12_9_1 decimal(6,3),
+	IN novovp12_9_2 decimal(6,3),
+	IN novovp12_9_3 decimal(6,3),
+	IN novovp15_0_1 decimal(6,3),
+	IN novovp15_0_2 decimal(6,3),
+	IN novovp15_0_3 decimal(6,3),
+	IN novovp17_6_1 decimal(6,3),
+	IN novovp17_6_2 decimal(6,3),
+	IN novovp17_6_3 decimal(6,3),
+	IN novovp20_2_1 decimal(6,3),
+	IN novovp20_2_2 decimal(6,3),
+	IN novovp20_2_3 decimal(6,3),
+	IN novovp22_8_1 decimal(6,3),
+	IN novovp22_8_2 decimal(6,3),
+	IN novovp22_8_3 decimal(6,3),
+	IN novovp25_0_1 decimal(6,3),
+	IN novovp25_0_2 decimal(6,3),
+	IN novovp25_0_3 decimal(6,3)
+)
+BEGIN
+	INSERT INTO controleDimensional( vp0_0_1, vp0_0_2, vp0_0_3, vp2_5_1, vp2_5_2, vp2_5_3, vp5_1_1, vp5_1_2, vp5_1_3, vp7_7_1, vp7_7_2, vp7_7_3, vp10_3_1, vp10_3_2, vp10_3_3, vp12_9_1, vp12_9_2, vp12_9_3, vp15_0_1, vp15_0_2, vp15_0_3, vp17_6_1, vp17_6_2, vp17_6_3, vp20_2_1, vp20_2_2, vp20_2_3, vp22_8_1, vp22_8_2, vp22_8_3, vp25_0_1, vp25_0_2, vp25_0_3)
+    VALUES (novovp0_0_1, novovp0_0_2, novovp0_0_3, novovp2_5_1, novovp2_5_2, novovp2_5_3, novovp5_1_1, novovp5_1_2, novovp5_1_3, novovp7_7_1, novovp7_7_2, novovp7_7_3, novovp10_3_1, novovp10_3_2, novovp10_3_3, novovp12_9_1, novovp12_9_2, novovp12_9_3, novovp15_0_1, novovp15_0_2, novovp15_0_3, novovp17_6_1, novovp17_6_2, novovp17_6_3, novovp20_2_1, novovp20_2_2, novovp20_2_3, novovp22_8_1, novovp22_8_2, novovp22_8_3, novovp25_0_1, novovp25_0_2, novovp25_0_3);
+END // 
+DELIMITER ;
+call criarControleDimensional(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 , 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33);
+select * from controleDimensional;
 
 
 -- alteração de controle dimensional
+DELIMITER //
+CREATE PROCEDURE modificarControleDimensional(
+	IN idControle int,
+	IN alterarvp0_0_1 decimal(6,3),
+	IN alterarvp0_0_2 decimal(6,3),
+	IN alterarvp0_0_3 decimal(6,3),
+	IN alterarvp2_5_1 decimal(6,3),
+	IN alterarvp2_5_2 decimal(6,3),
+	IN alterarvp2_5_3 decimal(6,3),
+	IN alterarvp5_1_1 decimal(6,3),
+	IN alterarvp5_1_2 decimal(6,3),
+	IN alterarvp5_1_3 decimal(6,3),
+	IN alterarvp7_7_1 decimal(6,3),
+	IN alterarvp7_7_2 decimal(6,3),
+	IN alterarvp7_7_3 decimal(6,3),
+	IN alterarvp10_3_1 decimal(6,3),
+	IN alterarvp10_3_2 decimal(6,3),
+	IN alterarvp10_3_3 decimal(6,3),
+	IN alterarvp12_9_1 decimal(6,3),
+	IN alterarvp12_9_2 decimal(6,3),
+	IN alterarvp12_9_3 decimal(6,3),
+	IN alterarvp15_0_1 decimal(6,3),
+	IN alterarvp15_0_2 decimal(6,3),
+	IN alterarvp15_0_3 decimal(6,3),
+	IN alterarvp17_6_1 decimal(6,3),
+	IN alterarvp17_6_2 decimal(6,3),
+	IN alterarvp17_6_3 decimal(6,3),
+	IN alterarvp20_2_1 decimal(6,3),
+	IN alterarvp20_2_2 decimal(6,3),
+	IN alterarvp20_2_3 decimal(6,3),
+	IN alterarvp22_8_1 decimal(6,3),
+	IN alterarvp22_8_2 decimal(6,3),
+	IN alterarvp22_8_3 decimal(6,3),
+	IN alterarvp25_0_1 decimal(6,3),
+	IN alterarvp25_0_2 decimal(6,3),
+	IN alterarvp25_0_3 decimal(6,3)
+)
+BEGIN
+	UPDATE controleDimensional
+    SET vp0_0_1 =  alterarvp0_0_1,
+	vp0_0_2 = alterarvp0_0_2,
+	vp0_0_3 = alterarvp0_0_3,
+	vp2_5_1 = alterarvp2_5_1,
+	vp2_5_2 = alterarvp2_5_2,
+	vp2_5_3 = alterarvp2_5_3,
+	vp5_1_1 = alterarvp5_1_1,
+	vp5_1_2 = alterarvp5_1_2,
+	vp5_1_3 = alterarvp5_1_3,
+	vp7_7_1 = alterarvp7_7_1,
+	vp7_7_2 = alterarvp7_7_2,
+	vp7_7_3 = alterarvp7_7_3,
+	vp10_3_1 = alterarvp10_3_1,
+	vp10_3_2 = alterarvp10_3_2,
+	vp10_3_3 = alterarvp10_3_3,
+	vp12_9_1 = alterarvp12_9_1,
+	vp12_9_2 = alterarvp12_9_2,
+	vp12_9_3 = alterarvp12_9_3,
+	vp15_0_1 = alterarvp15_0_1,
+	vp15_0_2 = alterarvp15_0_2,
+	vp15_0_3 = alterarvp15_0_3,
+	vp17_6_1 = alterarvp17_6_1,
+	vp17_6_2 = alterarvp17_6_2,
+	vp17_6_3 = alterarvp17_6_3,
+	vp20_2_1 = alterarvp20_2_1,
+	vp20_2_2 = alterarvp20_2_2,
+	vp20_2_3 = alterarvp20_2_3,
+	vp22_8_1 = alterarvp22_8_1,
+	vp22_8_2 = alterarvp22_8_2,
+	vp22_8_3 = alterarvp22_8_3,
+	vp25_0_1 = alterarvp25_0_1,
+	vp25_0_2 = alterarvp25_0_2,
+	vp25_0_3 = alterarvp25_0_3
+    WHERE pk_idControle = idControle;
+END // 
+DELIMITER ;
+call modificarControleDimensional(1, 33, 32, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1);
 
 
--- inserção de resultados do micrômetro
+-- inserção de resultados do micrômetro		// marques
+DELIMITER //
+CREATE PROCEDURE criarResultadosMicrometros(
+	IN idControle int,
+    IN idPlaneza int,
+    IN idParalelismoMicro int,
+    IN idInstrumento int,
+    IN novoResponsável varchar(60),
+    IN novoTecnico varchar(60),
+    IN novaDataCalibracao date,
+    IN novaInspecao enum("ok", "nok"),
+    IN novoTipoEscala enum("analogico", "digital"),
+    IN novaVersaoMetodo int,
+    IN novoTempInicial int,
+    IN novoTempFinal int
+)
+BEGIN
+	INSERT INTO resultadosMicrometros(fk_idControle, fk_idPlaneza, fk_idParalelismoMicro, fk_idInstrumento, responsavel, tecnico, dataCalibracao, inspecao, tipoEscala, versaoMetodo, tempInicial, tempFinal)
+    VALUES (idControle, idPlaneza, idParalelismoMicro, idInstrumento, novoResponsável, novoTecnico, novaDataCalibracao, novaInspecao, novoTipoEscala, novaVersaoMetodo,novoTempInicial, novoTempFinal);
+END // 
+DELIMITER ;
+call criarResultadosMicrometros()
 
 
--- alteração de resultados do micrômetro
+-- alteração de resultados do micrômetro	// marques
 
 
 -- inserção de mdeições internas  // marques
