@@ -635,9 +635,10 @@ DELIMITER ;
 call modificarControleDimensional(1, 33, 32, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1);
 
 
--- inserção de resultados do micrômetro		// marques
+-- inserção de resultados do micrômetro
 DELIMITER //
 CREATE PROCEDURE criarResultadosMicrometros(
+	IN nrCertificado int,
 	IN idControle int,
     IN idPlaneza int,
     IN idParalelismoMicro int,
@@ -648,21 +649,80 @@ CREATE PROCEDURE criarResultadosMicrometros(
     IN novaInspecao enum("ok", "nok"),
     IN novoTipoEscala enum("analogico", "digital"),
     IN novaVersaoMetodo int,
-    IN novoTempInicial int,
-    IN novoTempFinal int
+    IN novoTempInicial decimal(4,2),
+    IN novoTempFinal decimal(4,2)
 )
 BEGIN
-	INSERT INTO resultadosMicrometros(fk_idControle, fk_idPlaneza, fk_idParalelismoMicro, fk_idInstrumento, responsavel, tecnico, dataCalibracao, inspecao, tipoEscala, versaoMetodo, tempInicial, tempFinal)
-    VALUES (idControle, idPlaneza, idParalelismoMicro, idInstrumento, novoResponsável, novoTecnico, novaDataCalibracao, novaInspecao, novoTipoEscala, novaVersaoMetodo,novoTempInicial, novoTempFinal);
+	INSERT INTO resultadosMicrometros(pk_idNrCertificado, fk_idControle, fk_idPlaneza, fk_idParalelismoMicro, fk_idInstrumento, responsavel, tecnico, dataCalibracao, inspecao, tipoEscala, versaoMetodo, tempInicial, tempFinal)
+    VALUES (nrCertificado, idControle, idPlaneza, idParalelismoMicro, idInstrumento, novoResponsável, novoTecnico, novaDataCalibracao, novaInspecao, novoTipoEscala, novaVersaoMetodo,novoTempInicial, novoTempFinal);
 END // 
 DELIMITER ;
-call criarResultadosMicrometros()
+call criarResultadosMicrometros(745, 1, 1, 1, 1, "Douglas", "Gleicy", '2024-03-21', "ok", "analogico", 9, 20.70, 20.5);
+select * from resultadosMicrometros;
 
 
--- alteração de resultados do micrômetro	// marques
+-- alteração de resultados do micrômetro
+DELIMITER //
+CREATE PROCEDURE modificarResultadosMicrometros(
+	IN antigoNrCertificado int,
+    IN alterarNrCertificado int,
+	IN idControle int,
+    IN idPlaneza int,
+    IN idParalelismoMicro int,
+    IN idInstrumento int,
+    IN alterarResponsável varchar(60),
+    IN alterarTecnico varchar(60),
+    IN alterarDataCalibracao date,
+    IN alterarInspecao enum("ok", "nok"),
+    IN alterarTipoEscala enum("analogico", "digital"),
+    IN alterarVersaoMetodo int,
+    IN alterarTempInicial decimal(4,2),
+    IN alterarTempFinal decimal(4,2)
+)
+BEGIN
+	UPDATE resultadosMicrometros
+    SET pk_idNrCertificado = alterarNrCertificado,
+    fk_idControle = idControle,
+    fk_idPlaneza = idPlaneza,
+    fk_idParalelismoMicro = idParalelismoMicro,
+    fk_idInstrumento = idInstrumento,
+    responsavel = alterarResponsável,
+    tecnico = alterarTecnico,
+    dataCalibracao = alterarDataCalibracao,
+    inspecao = alterarInspecao,
+    tipoEscala = alterarTipoEscala,
+    versaoMetodo = alterarVersaoMetodo,
+    tempInicial = alterarTempInicial,
+    tempFinal = alterarTempFinal
+    WHERE pk_idNrCertificado = antigoNrCertificado;
+END // 
+DELIMITER ;
+call modificarResultadosMicrometros(745, 750, 1, 1, 1, 1, "Gleicy", "Douglas", '2024-03-21', "ok", "analogico", 9, 20.70, 20.5);
 
 
 -- inserção de mdeições internas  // marques
+DELIMITER //
+CREATE PROCEDURE criarMedicaoInterna(
+	IN novaPrimeiraMedida decimal(6,3),
+    IN novoValorNominal1_1 decimal(6,3),
+    IN novoValorNominal1_2 decimal(6,3),
+    IN novoValorNominal1_3 decimal(6,3),
+    IN novaSegundaMedida decimal(6,3),
+    IN novoValorNominal2_1 decimal(6,3),
+    IN novoValorNominal2_2 decimal(6,3),
+    IN novoValorNominal2_3 decimal(6,3),
+    IN novaTerceiraMedida decimal(6,3),
+    IN novoValorNominal3_1 decimal(6,3),
+    IN novoValorNominal3_2 decimal(6,3),
+    IN novoValorNominal3_3 decimal(6,3)
+)
+BEGIN
+	INSERT INTO medicoesInternas(primeiraMedida, valorNominal1_1, valorNominal1_2, valorNominal1_3, segundaMedida, valorNominal2_1, valorNominal2_2, valorNominal2_3, terceiraMedida, valorNominal3_1, valorNominal3_2, valorNominal3_3)
+    VALUES (novaPrimeiraMedida, novoValorNominal1_1, novoValorNominal1_2, novoValorNominal1_3, novaSegundaMedida, novoValorNominal2_1, novoValorNominal2_2, novoValorNominal2_3, novaTerceiraMedida, novoValorNominal3_1, novoValorNominal3_2, novoValorNominal3_3);
+END // 
+DELIMITER ;
+call criarMedicaoInterna(1.2, 2.3, 3.4, 4.5, 5.6, 6.7, 7.8, 8.9, 9.0, 1.1, 2.2, 3.3);
+select * from medicoesInternas; 
 
 
 -- alteração de mdeições internas

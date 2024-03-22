@@ -5,7 +5,7 @@ USE bancointelliMetrics;
 DROP DATABASE bancointelliMetrics;
 
 CREATE TABLE usuarios(
-	pk_idUsuario int PRIMARY KEY AUTO_inCREMENT,
+	pk_idUsuario int PRIMARY KEY AUTO_INCREMENT,
     nome varchar(60) NOT NULL,
     email varchar(60) NOT NULL UNIQUE,
     senha varchar(10) NOT NULL DEFAULT "Suiclab123",
@@ -14,7 +14,7 @@ CREATE TABLE usuarios(
 );
 
 CREATE TABLE clientes(
-	pk_idCliente int PRIMARY KEY AUTO_inCREMENT,
+	pk_idCliente int PRIMARY KEY AUTO_INCREMENT,
     nomeEmpresa varchar(60) NOT NULL,
     representante varchar(60) NOT NULL,
     email varchar(60) NOT NULL UNIQUE,
@@ -43,7 +43,7 @@ CREATE TABLE ordensServico(
 );
 
 CREATE TABLE instrumentosRecebidos(
-	pk_idinstrumentoRecebido int PRIMARY KEY AUTO_inCREMENT,
+	pk_idinstrumentoRecebido int PRIMARY KEY AUTO_INCREMENT,
     fk_idOs int NOT NULL,
     fk_idUsuario int NOT NULL,
     setor varchar(30) NOT NULL,
@@ -61,12 +61,12 @@ CREATE TABLE instrumentosRecebidos(
 );
 
 CREATE TABLE categorias(
-	pk_idCategoria int PRIMARY KEY AUTO_inCREMENT,
+	pk_idCategoria int PRIMARY KEY AUTO_INCREMENT,
     nome varchar(30) NOT NULL UNIQUE
 );
 
 CREATE TABLE tipos(
-	pk_idTipo int PRIMARY KEY AUTO_inCREMENT,
+	pk_idTipo int PRIMARY KEY AUTO_INCREMENT,
     fk_idCategoria int NOT NULL,
     nome varchar(30) NOT NULL UNIQUE,
     
@@ -74,7 +74,7 @@ CREATE TABLE tipos(
 );
 
 CREATE TABLE instrumentos(
-	pk_idinstrumento int PRIMARY KEY AUTO_inCREMENT,
+	pk_idinstrumento int PRIMARY KEY AUTO_INCREMENT,
     fk_idCliente int NOT NULL,
     fk_idOs int NOT NULL,
     fk_idTipo int NOT NULL,
@@ -165,8 +165,8 @@ CREATE TABLE resultadosMicrometros(
     inspecao enum("ok", "nok") NOT NULL,
     tipoEscala enum("analogico", "digital") NOT NULL,
     versaoMetodo int NOT NULL,
-    tempInicial int NOT NULL,
-    tempFinal int NOT NULL,
+    tempInicial decimal(4,2) NOT NULL,
+    tempFinal decimal(4,2) NOT NULL,
     
     FOREIGN KEY(fk_idControle) REFERENCES controleDimensional(pk_idControle),
     FOREIGN KEY(fk_idPlaneza) REFERENCES planeza(pk_idPlaneza),
@@ -174,7 +174,7 @@ CREATE TABLE resultadosMicrometros(
     FOREIGN KEY(fk_idInstrumento) REFERENCES instrumentos(pk_idInstrumento)
 );
 
-CREATE TABLE medicoesinternas(
+CREATE TABLE medicoesInternas(
 	pk_idMedicaointerna	int PRIMARY KEY AUTO_INCREMENT,
     primeiraMedida decimal(6,3) NOT NULL,
     valorNominal1_1 decimal(6,3) NOT NULL,
@@ -285,8 +285,8 @@ CREATE TABLE resultadosPaquimetros(
     inspecao int NOT NULL,
     tipoEscala	enum("digital","analogico") NOT NULL,
     versapoMetodo int NOT NULL,
-    tempInicial	decimal(3,2) NOT NULL,
-    tempFinal decimal(3,2) NOT NULL,
+    tempInicial	decimal(4,2) NOT NULL,
+    tempFinal decimal(4,2) NOT NULL,
     responsavel varchar(50) NOT NULL,
     tecnico varchar(50) NOT NULL,
     
