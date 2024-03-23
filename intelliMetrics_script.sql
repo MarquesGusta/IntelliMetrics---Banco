@@ -42,8 +42,8 @@ CREATE TABLE ordensServico(
     FOREIGN KEY(fk_idUsuario) REFERENCES usuarios(pk_idUsuario)
 );
 
-CREATE TABLE instrumentosRecebidos(
-	pk_idinstrumentoRecebido int PRIMARY KEY AUTO_INCREMENT,
+CREATE TABLE recebidos(
+	pk_idRecebimento int PRIMARY KEY AUTO_INCREMENT,
     fk_idOs int NOT NULL,
     fk_idUsuario int NOT NULL,
     setor varchar(30) NOT NULL,
@@ -55,6 +55,8 @@ CREATE TABLE instrumentosRecebidos(
     previsaoTermino date,
     clienteConcorda enum("sim", "nao") NOT NULL,
     dataAssinatura date NOT NULL,
+    pessoaContatada varchar(60),
+    dataContatada date,
     
     FOREIGN KEY(fk_idOs) REFERENCES ordensServico(pk_idOs),
     FOREIGN KEY(fk_idUsuario) REFERENCES usuarios(pk_idUsuario)
@@ -73,20 +75,19 @@ CREATE TABLE tipos(
     FOREIGN KEY(fk_idCategoria) REFERENCES categorias(pk_idCategoria)
 );
 
-CREATE TABLE instrumentos(
-	pk_idinstrumento int PRIMARY KEY AUTO_INCREMENT,
+CREATE TABLE instrumentos(     -- //
+	pk_idInstrumento int PRIMARY KEY AUTO_INCREMENT,
     fk_idCliente int NOT NULL,
     fk_idOs int NOT NULL,
     fk_idTipo int NOT NULL,
     nSerie int NOT NULL,
     identificacaoCliente varchar(50) NOT NULL,
     fabricante varchar(60) NOT NULL,
-    faixaNominalNum decimal(3,2) NOT NULL,
+    faixaNominalNum decimal(4,2) NOT NULL,
     faixaNominalUni enum("mm", "pol") NOT NULL,
-    faixaCalibradaNum decimal(3,2) NOT NULL,
-    faixaCalibradaUni enum("mm", "pol") NOT NULL,
-    divisaoResolucaoNum decimal(3,2) NOT NULL,
+    divisaoResolucaoNum decimal(4,2) NOT NULL,
     divisaoResolucaoUni enum("mm", "pol") NOT NULL,
+    orgaoResponsavel varchar(60),
     
     FOREIGN KEY(fk_idCliente) REFERENCES clientes(pk_idCliente),
     FOREIGN KEY(fk_idOs) REFERENCES ordensServico(pk_idOs),
@@ -159,8 +160,10 @@ CREATE TABLE resultadosMicrometros(
     fk_idPlaneza int NOT NULL,
     fk_idParalelismoMicro int NOT NULL,
     fk_idInstrumento int NOT NULL,
-    responsavel varchar(60) NOT NULL,
-    tecnico varchar(60) NOT NULL,
+    fk_idTecnico int NOT NULL,
+    fk_idResponsavel int NOT NULL,
+    faixaCalibradaNum decimal(4,2) NOT NULL,
+    faixaCalibradaUni enum("mm", "pol") NOT NULL,
     dataCalibracao date NOT NULL,
     inspecao enum("ok", "nok") NOT NULL,
     tipoEscala enum("analogico", "digital") NOT NULL,
@@ -171,7 +174,9 @@ CREATE TABLE resultadosMicrometros(
     FOREIGN KEY(fk_idControle) REFERENCES controleDimensional(pk_idControle),
     FOREIGN KEY(fk_idPlaneza) REFERENCES planeza(pk_idPlaneza),
     FOREIGN KEY(fk_idParalelismoMicro) REFERENCES paralelismoMicro(pk_idParalelismoMicro),
-    FOREIGN KEY(fk_idInstrumento) REFERENCES instrumentos(pk_idInstrumento)
+    FOREIGN KEY(fk_idInstrumento) REFERENCES instrumentos(pk_idInstrumento),
+    FOREIGN KEY(fk_idTecnico) REFERENCES usuarios(pk_idUsuario),
+    FOREIGN KEY(fk_idResponsavel) REFERENCES usuarios(pk_idUsuario)
 );
 
 CREATE TABLE medicoesInternas(
@@ -223,7 +228,7 @@ CREATE TABLE medicoesProfundidades(
 );
 
 CREATE TABLE paralelismoPaq(
-	pk_idParelelismo int PRIMARY KEY AUTO_INCREMENT,
+	pk_idParalelismoPaq int PRIMARY KEY AUTO_INCREMENT,
     valorNominalOrelha	decimal(6,3) NOT NULL,
     valorProxOrelha1 decimal(6,3) NOT NULL,
     valorProxOrelha2 decimal(6,3) NOT NULL,
@@ -277,26 +282,30 @@ CREATE TABLE medicoesExternas(
 CREATE TABLE resultadosPaquimetros(
 	pk_idNrCertificado int PRIMARY KEY,
     fk_idInstrumento int NOT NULL,
-    fk_idParalelismo int NOT NULL,
-	fk_idMedicaoExterna int NOT NULL,
-    fk_idMedicaointerna int NOT NULL,
+    fk_idParalelismoPaq int NOT NULL,
+    fk_idMedicaoExterna int NOT NULL,
+    fk_idMedicaoInterna int NOT NULL,
     fk_idMedicaoRessalto int NOT NULL,
     fk_idMedicaoProfundidade int NOT NULL,
-    inspecao int NOT NULL,
-    tipoEscala	enum("digital","analogico") NOT NULL,
-    versapoMetodo int NOT NULL,
-    tempInicial	decimal(4,2) NOT NULL,
+    fk_idTecnico int NOT NULL,
+    fk_idResponsavel int NOT NULL,
+    faixaCalibradaNum decimal(4,2) NOT NULL,
+    faixaCalibradaUni enum("mm", "pol") NOT NULL,
+    dataCalibracao date NOT NULL,
+    inspecao enum("ok", "nok") NOT NULL,
+    tipoEscala enum("analogico", "digital") NOT NULL,
+    versaoMetodo int NOT NULL,
+    tempInicial decimal(4,2) NOT NULL,
     tempFinal decimal(4,2) NOT NULL,
-    responsavel varchar(50) NOT NULL,
-    tecnico varchar(50) NOT NULL,
     
-    FOREIGN KEY (fk_idInstrumento) REFERENCES instrumentos(pk_idinstrumento),
-    FOREIGN KEY (fk_idParalelismo) REFERENCES paralelismoPaq(pk_idParelelismo),
-    FOREIGN KEY (fk_idMedicaoExterna) REFERENCES medicoesExternas(pk_idMedicaoExterna),
-    FOREIGN KEY (fk_idMedicaointerna) REFERENCES medicoesinternas(pk_idMedicaointerna),
-    FOREIGN KEY (fk_idMedicaoRessalto) REFERENCES medicoesRessaltos(pk_idMedicaoRessalto),
-    FOREIGN KEY (fk_idMedicaoProfundidade) REFERENCES medicoesProfundidades(pk_idMedicaoProfundidade)
-    
+    FOREIGN KEY(fk_idInstrumento) REFERENCES instrumentos(pk_idInstrumento),
+    FOREIGN KEY(fk_idParalelismoPaq) REFERENCES paralelismoPaq(pk_idParalelismoPaq),
+    FOREIGN KEY(fk_idMedicaoExterna) REFERENCES medicoesExternas(pk_idMedicaoExterna),
+    FOREIGN KEY(fk_idMedicaoInterna) REFERENCES medicoesInternas(pk_idMedicaoInterna),
+    FOREIGN KEY(fk_idMedicaoRessalto) REFERENCES medicoesRessaltos(pk_idMedicaoRessalto),
+    FOREIGN KEY(fk_idMedicaoProfundidade) REFERENCES medicoesProfundidades(pk_idMedicaoProfundidade),
+    FOREIGN KEY(fk_idTecnico) REFERENCES usuarios(pk_idUsuario),
+    FOREIGN KEY(fk_idResponsavel) REFERENCES usuarios(pk_idUsuario)
 );
 
 CREATE TABLE pecas(
@@ -312,35 +321,24 @@ CREATE TABLE pecas(
     FOREIGN KEY(fk_idCliente) REFERENCES clientes(pk_idCliente)
 );
 
-CREATE TABLE pecasRecebidas(
-	pk_idRecebimento int PRIMARY KEY,
-	fk_idOs int NOT NULL,
-    fk_idUsuario int NOT NULL,
-    setor varchar(50) NOT NULL,
-    nProposta int NOT NULL,
-    nNotaFiscal int NOT NULL,
-    dataDeRecebimento date NOT NULL,
-    recebidoNaPrevisao enum("sim", "nao") NOT NULL,
-    previsaoInicio date, 
-    previsaoTermino date,
-    clienteConcorda enum("sim", "nao") NOT NULL,
-    -- responsavelRecebimento varchar(60) NOT NULL,
-    dataAssinatura date NOT NULL,
-    
-    FOREIGN KEY (fk_idOs) REFERENCES	ordensServico(pk_idOs)
-);
-
 CREATE TABLE relatorio(
 	pk_idRelatorio int PRIMARY KEY,
     fk_idOs int NOT NULL,
     fk_idInstrumento int NOT NULL,
-    inicio varchar(20) NOT NULL,
-    termino varchar(20) NOT NULL,
+    fk_idUsuario int NOT NULL,
+    inicio time(0) NOT NULL,	-- o 'time(o)' faz com que a coluna receba apenas valores de hora e minuto. Devem ser inseridos dentro de aspas: '09:00'
+    termino time(0) NOT NULL,
+    tempoTotal time(0) NOT NULL,
     temperaturaC varchar(20) NOT NULL,
     umidadeRelativa varchar(20) NOT NULL,
-    notasMedicao varchar(20) NOT NULL,
-    dia DATE NOT NULL,
+    observacoes varchar(300),
+    localDaMedicao varchar(100) NOT NULL,
+    dia date NOT NULL,
+    assinatura varchar(100) NOT NULL,
     
     FOREIGN KEY (fk_idOs) REFERENCES ordensServico(pk_idOs),
-    FOREIGN KEY (fk_idInstrumento) REFERENCES instrumentos(pk_idInstrumento)
+    FOREIGN KEY (fk_idInstrumento) REFERENCES instrumentos(pk_idInstrumento),
+    FOREIGN KEY(fk_idUsuario) REFERENCES usuarios(pk_idUsuario)
 );
+
+-- achar uma maneira de inserir a incerteza do instrumento
