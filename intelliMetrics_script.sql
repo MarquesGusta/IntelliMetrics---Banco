@@ -309,7 +309,7 @@ CREATE TABLE resultadosPaquimetros(
 );
 
 CREATE TABLE pecas(
-	pk_idPeca int PRIMARY KEY,
+	pk_idPeca int PRIMARY KEY AUTO_INCREMENT,
     fk_idOs int NOT NULL,
     fk_idCliente int NOT NULL,
 	nome varchar(60) NOT NULL,

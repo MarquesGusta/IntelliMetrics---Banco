@@ -169,6 +169,7 @@ BEGIN
 END // 
 DELIMITER ;
 call criarOrdens(556, 1, 1, "Arregaça ai esse paquímetro", "calibracao", "Paquímetro ta com defeito", curdate(), '2024-03-27', "Bill Gates", "gatesbill@gmail.com", 11902345567, "em espera");
+call criarOrdens(665, 1, 1, "Arregaça ai esse parafuso", "medicao", "Parafuso torto", curdate(), '2024-04-28', "Bill Gates", "gatesbill@gmail.com", 11902345567, "em espera");
 select * from ordensServico;
 drop procedure criarOrdens;
 
@@ -375,6 +376,7 @@ BEGIN
 END //
 DELIMITER ;
 call inserirRecebimento(556, 1, "rh", 12341, 12344563, '2024-03-27', "sim", null, null, "sim", '2024-03-28', null, null);
+call inserirRecebimento(665, 2, "financeiro", 33452, 00097612, '2024-03-27', "sim", null, null, "sim", '2024-08-28', null, null);
 select * from recebidos;
 drop procedure recebimento;
 
@@ -1183,37 +1185,78 @@ DELIMITER ;
 -- também precisamos criar um trigger para caso eles alterem o id de uma ordem de serviço, também altere as fks que estão referenciando essa ordem
 
 
--- cadastro de peças   // Leal
+-- cadastro de peças
 DELIMITER //
-CREATE PROCEDURE cadastrarPeca(
-
+CREATE PROCEDURE cadastrarPeca (
+    IN idOs int,
+    IN idCliente int,
+    IN novoNome varchar(60),
+    IN novoMaterial varchar(60),
+    IN novoNDesenho int,
+    IN novaDescricao varchar(300)
 )
 BEGIN
-
-END // 
+    INSERT INTO pecas (fk_idOs, fk_idCliente, nome, material, nDesenho, descricao)
+    VALUES (idOs, idCliente, novoNome, novoMaterial, novoNDesenho, novaDescricao);
+END //
 DELIMITER ;
+call cadastrarPeca(665, 1, 'Paraconfuso', 'Ferro', 12345, 'Parafuso ta torto para a esquerda, naquele pique');
+call cadastrarPeca(665, 1, 'Prego macaco', 'Aço inox', 54321, 'Prego macaco não ta perfurando a madeira direito');
+select * from pecas;
+DROP PROCEDURE cadastrarPeca;
 
 
--- alteraçao de peças   // Leal
+-- alteraçao de peças
 DELIMITER //
-CREATE PROCEDURE modificarPeca(
-
+CREATE PROCEDURE alterarPeca (
+    IN idPeca int,
+    IN idOs int,
+    IN idCliente int,
+    IN alterarNome varchar(60),
+    IN alterarMaterial varchar(60),
+    IN alterarNDesenho int,
+    IN alterarDescricao varchar(300)
 )
 BEGIN
-
-END // 
+    UPDATE pecas
+    SET fk_idOs = idOs,
+    fk_idCliente = idCliente,
+    nome = alterarNome,
+    material = alterarMaterial,
+    nDesenho = alterarNDesenho,
+    descricao = alterarDescricao
+    WHERE pk_idPeca = idPeca;
+END //
 DELIMITER ;
+call alterarPeca(1, 665, 1, 'Parafuso', 'Metal', 12345, 'Parafuso ta torto');
+drop procedure alterarPeca;
 
 
 -- criação de relatório   // Leal
 DELIMITER //
-CREATE PROCEDURE criarRelatorio(
-
+CREATE PROCEDURE criarRelatorio (
+	IN idRelatorio int,
+    IN idOs int,
+    IN idInstrumento int,
+    IN idUsuario int,
+    IN novoInicio time,
+    IN novoTermino time,
+    IN novoTempoTotal time,
+    IN novoTemperaturaC varchar(20),
+    IN novaUmidadeRelativa varchar(20),
+    IN novoObservacoes varchar(300),
+    IN novoLocalDaMedicao varchar(100),
+    IN novoDia date,
+    IN novaAssinatura varchar(100)
 )
 BEGIN
-
-END // 
+    INSERT INTO relatorio (pk_idRelatorio, fk_idOs, fk_idInstrumento, fk_idUsuario, inicio, termino, tempoTotal, temperaturaC, umidadeRelativa, observacoes, localDaMedicao, dia, assinatura)
+    VALUES (idRelatorio, idOs, idInstrumento, idUsuario, novoInicio, novoTermino, novoTempoTotal, novoTemperaturaC, novaUmidadeRelativa, novoObservacoes, novoLocalDaMedicao, novoDia, novaAssinatura);
+END //
 DELIMITER ;
+call criarRelatorio(23, 665, 2, 1, '09:00', '17:00', '26:00', '25°C', '50%', 'Nenhuma observação', 'Laboratório A', '2024-03-24', 'Assinatura do técnico');
+select * from relatorio;
+drop procedure criarRelatorio;
 
 
 -- alteração de relatório   // Leal
