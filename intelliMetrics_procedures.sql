@@ -1158,28 +1158,6 @@ DELIMITER ;
 call modificarResultadosPaquimetro(322, 350, 1, 1, 1, 1, 1, 1, 1, 2, 8.5, "mm", '2024-03-25', "nok", "analogico", 9, 22.5, 22);
 
 
--- criação de certificados
-DELIMITER //
-CREATE PROCEDURE criarCertificado(
-
-)
-BEGIN
-
-END // 
-DELIMITER ;
-
-
--- alteração de texto de um certificado
-DELIMITER //
-CREATE PROCEDURE alterarCertificado(
-
-)
-BEGIN
-
-END // 
-DELIMITER ;
-
-
 -- precisamos criar um trigger para alterar o número do certificado caso eles alterem algum valor da calibração
 
 -- também precisamos criar um trigger para caso eles alterem o id de uma ordem de serviço, também altere as fks que estão referenciando essa ordem
@@ -1232,7 +1210,7 @@ call alterarPeca(1, 665, 1, 'Parafuso', 'Metal', 12345, 'Parafuso ta torto');
 drop procedure alterarPeca;
 
 
--- criação de relatório   // Leal
+-- criação de relatório
 DELIMITER //
 CREATE PROCEDURE criarRelatorio (
 	IN idRelatorio int,
@@ -1259,12 +1237,40 @@ select * from relatorio;
 drop procedure criarRelatorio;
 
 
--- alteração de relatório   // Leal
+-- alteração de relatório
 DELIMITER //
 CREATE PROCEDURE modificarRelatorio(
-
+	IN antigoIdRelatorio int,
+	IN alterarIdRelatorio int,
+    IN idOs int,
+    IN idInstrumento int,
+    IN idUsuario int,
+    IN alterarInicio time,
+    IN alterarTermino time,
+    IN alterarTempoTotal time,
+    IN alterarTemperaturaC varchar(20),
+    IN alterarUmidadeRelativa varchar(20),
+    IN alterarObservacoes varchar(300),
+    IN alterarLocalDaMedicao varchar(100),
+    IN alterarDia date,
+    IN alterarAssinatura varchar(100)
 )
 BEGIN
-
+	UPDATE relatorio
+    SET pk_idRelatorio = alterarIdRelatorio,
+    fk_idOs = idOs,
+    fk_idInstrumento = idInstrumento,
+    fk_idUsuario = idUsuario,
+    inicio = alterarInicio,
+    termino = alterarTermino,
+    tempoTotal = alterarTempoTotal,
+    temperaturaC = alterarTemperaturaC,
+    umidadeRelativa = alterarUmidadeRelativa,
+    observacoes = alterarObservacoes,
+    localDaMedicao = alterarLocalDaMedicao,
+    dia = alterarDia,
+    assinatura = alterarAssinatura
+    WHERE pk_idRelatorio = antigoIdRelatorio;
 END // 
 DELIMITER ;
+call modificarRelatorio(23, 32, 665, 2, 1, '10:00', '18:00', '8:00', '25°C', '50%', 'Nenhuma observação', 'Laboratório A', '2024-03-24', 'Assinatura do técnico');
