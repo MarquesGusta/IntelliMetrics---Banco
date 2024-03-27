@@ -75,6 +75,26 @@ DELIMITER ;
 call reativarUsuario("theuzinapalaum@gmail.com");
 
 
+-- retornar informações do usário
+DELIMITER //
+CREATE PROCEDURE infosUsuario(
+	IN idUsuario INT,
+    OUT nomeUsuario VARCHAR(60),
+    OUT emailUsuario VARCHAR(60),
+    OUT cargoUsuario ENUM('gestor', 'tecnico'),
+    OUT statusUsuario ENUM('ativo', 'inativo')
+)
+BEGIN
+    SELECT nome, email, cargo, status
+    INTO nomeUsuario, emailUsuario, cargoUsuario, statusUsuario
+    FROM usuarios
+    WHERE pk_idUsuario = idUsuario;
+END//
+DELIMITER ;
+call infosUsuario(2, @nome, @email, @cargo, @status);
+SELECT @nome AS nomeUsuario, @email AS emailUsuario, @cargo AS cargoUsuario, @status AS statusUsuario;
+
+
 -- criação de cliente
 DELIMITER //
 CREATE PROCEDURE criarCliente(
@@ -145,6 +165,29 @@ BEGIN
 END // 
 DELIMITER ;
 call reativarCliente(1);
+
+
+-- retornar informações do cliente
+DELIMITER //
+CREATE PROCEDURE infosCliente(
+	IN idCliente INT,
+    OUT nomeCliente VARCHAR(60),
+    OUT representanteCliente VARCHAR(60),
+    OUT emailCliente VARCHAR(60),
+    OUT telefoneCliente VARCHAR(11),
+    OUT enderecoCliente VARCHAR(100),
+    OUT cnpjCliente CHAR(14),
+    OUT statusCliente ENUM('ativo', 'inativo')
+)
+BEGIN
+    SELECT nomeEmpresa, representante, email, telefone, endereco, cnpj, status
+    INTO nomeCliente, representanteCliente, emailCliente, telefoneCliente, enderecoCliente, cnpjCliente, statusCliente
+    FROM clientes
+    WHERE pk_idCliente = idCliente;
+END//
+DELIMITER ;
+CALL infosCliente(1, @nomeEmpresa, @representante, @email, @telefone, @endereco, @cnpj, @status);
+SELECT @nomeEmpresa AS nomeCliente, @representante AS representanteCliente, @email AS emailCliente, @telefone AS telefoneCliente, @endereco AS enderecoCliente, @cnpj AS cnpjCliente, @status AS statusCliente;
 
 
 -- criação de ordem de serviço
@@ -236,65 +279,31 @@ DELIMITER ;
 call desmarcarOrdemComoConcluida(45);
 
 
--- criação de categorias
+-- retornar informações da ordem de serviço
 DELIMITER //
-CREATE PROCEDURE criarCategoria(
-	IN novaCategoria varchar(30)
-)
+CREATE PROCEDURE infosOrdens(
+	IN idOs INT,
+    OUT idOsResultado INT,
+    OUT fk_idClienteOs INT,
+    OUT fk_idUsuarioOs INT,
+    OUT tituloOs VARCHAR(30),
+    OUT tipoOs ENUM('calibracao', 'medicao'),
+    OUT descricaoOs VARCHAR(300),
+    OUT dataInicioOs DATE,
+    OUT dataTerminoOs DATE,
+    OUT contratanteOs VARCHAR(60),
+    OUT emailOs VARCHAR(60),
+    OUT telefoneOs VARCHAR(11),
+    OUT statusOs ENUM('em espera', 'concluida'))
 BEGIN
-	INSERT INTO categorias(nome) VALUES (novaCategoria);
-END // 
+    SELECT pk_idOs, fk_idCliente, fk_idUsuario, titulo, tipo, descricao, dataInicio, dataTermino, contratante, email, telefone, status
+    INTO idOsResultado, fk_idClienteOs, fk_idUsuarioOs, tituloOs, tipoOs, descricaoOs, dataInicioOs, dataTerminoOs, contratanteOs, emailOs, telefoneOs, statusOs
+    FROM ordensServico
+    WHERE pk_idOs = idOs;
+END//
 DELIMITER ;
-call criarCategoria("abidas");
-select * from categorias;
-
-
--- alteração de categorias
-DELIMITER //
-CREATE PROCEDURE modificarCategoria(
-	IN categoriaAlterda int,
-	IN alterarNome varchar(30)
-)
-BEGIN
-	UPDATE categorias
-    SET nome = alterarNome
-    WHERE pk_idCategoria = categoriaAlterda;
-END // 
-DELIMITER ;
-call modificarCategoria(1, "neki");
-
-
--- criação de tipos
-DELIMITER //
-CREATE PROCEDURE criarTipo(
-    IN idCategoria int,
-    IN novoTipo varchar(30)
-)
-BEGIN
-    INSERT INTO tipos(fk_idCategoria, nome) VALUES (idCategoria, novoTipo);
-END //
-DELIMITER ;
-call criarTipo(1, "tenis");
-select * from tipos;
-
-
-
--- alteração de tipos
-DELIMITER //
-CREATE PROCEDURE modificarTipo(
-    IN idTipo int,
-    IN alterarCategoria int,
-    IN alterarTipo varchar(30)
-)
-BEGIN
-    UPDATE tipos
-    SET fk_idCategoria = alterarCategoria,
-    nome = alterarTipo
-    WHERE pk_idTipo = idTipo;
-END //
-DELIMITER ;
-call modificarTipo(1, 1, "sapatu");
-
+CALL infosOrdens(665, @idOs, @fk_idCliente, @fk_idUsuario, @titulo, @tipo, @descricao, @dataInicio, @dataTermino, @contratante, @email, @telefone, @status);
+SELECT @idOs AS idOsResultado, @fk_idCliente AS fk_idClienteOs, @fk_idUsuario AS fk_idUsuarioOs, @titulo AS tituloOs, @tipo AS tipoOs, @descricao AS descricaoOs, @dataInicio AS dataInicioOs, @dataTermino AS dataTerminoOs, @contratante AS contratanteOs, @email AS emailOs, @telefone AS telefoneOs, @status AS statusOs;
 
 
 -- cadastro de instrumentos
@@ -302,7 +311,7 @@ DELIMITER //
 CREATE PROCEDURE cadastrarInstrumento(
     IN idCliente int,
     IN idOrdem int,
-    IN idTipo int,
+    IN novoNome varchar(60),
     IN novoNSerie int,
     IN novaIdentificacaoCliente int,
     IN novoFabricante varchar(60),
@@ -312,11 +321,11 @@ CREATE PROCEDURE cadastrarInstrumento(
     IN novaDivisaoUni enum('mm', 'pol')
 )
 BEGIN
-    INSERT INTO instrumentos(fk_idCliente, fk_idOs, fk_idTipo, nSerie, identificacaoCliente, fabricante, faixaNominalNum, faixaNominalUni, divisaoResolucaoNum, divisaoResolucaoUni)
-    VALUES (idCliente, idOrdem, idTipo, novoNSerie, novaIdentificacaoCliente, novoFabricante, novaFaixaNominalNum, novaFaixaNominalUnidade, novaDivisaoNum, novaDivisaoUni);
+    INSERT INTO instrumentos(fk_idCliente, fk_idOs, nome, nSerie, identificacaoCliente, fabricante, faixaNominalNum, faixaNominalUni, divisaoResolucaoNum, divisaoResolucaoUni)
+    VALUES (idCliente, idOrdem, novoNome, novoNSerie, novaIdentificacaoCliente, novoFabricante, novaFaixaNominalNum, novaFaixaNominalUnidade, novaDivisaoNum, novaDivisaoUni);
 END //
 DELIMITER ;
-call cadastrarInstrumento(1, 556, 1, 112233, 1222333,  "Martelos e machados", 1.2, "mm", 2.43, "mm");
+call cadastrarInstrumento(1, 556, "Paquímetro retardado", 112233, 1222333,  "Martelos e machados", 1.2, "mm", 2.43, "mm");
 select * from instrumentos;
 
 
@@ -353,6 +362,34 @@ DELIMITER ;
 call modificarInstrumento(1, 1, 556, 1, 112233, 111232, "Machados e Martelos", 2.21, "pol", 5.32, "mm");
 
 
+-- retornar informações de instrumento
+DELIMITER //
+CREATE PROCEDURE infosInstrumento(
+	IN idInstrumento INT,
+    OUT idCliente INT,
+    OUT idOs INT,
+    OUT infoNome varchar(60),
+    OUT infoNSerie INT,
+    OUT infoIdentificacaoCliente VARCHAR(50),
+    OUT infoFabricante VARCHAR(60),
+    OUT infoFaixaNominalNum DECIMAL(4,2),
+    OUT infoFaixaNominalUni ENUM('mm', 'pol'),
+    OUT infoDivisaoResolucaoNum DECIMAL(4,2),
+    OUT infoDivisaoResolucaoUni ENUM('mm', 'pol'),
+    OUT infoOrgaoResponsavel VARCHAR(60)
+)
+BEGIN
+    SELECT fk_idCliente, fk_idOs, nome, nSerie, identificacaoCliente, fabricante, faixaNominalNum, faixaNominalUni, divisaoResolucaoNum, divisaoResolucaoUni, orgaoResponsavel
+    INTO idCliente, idOs, infoNome, infoNSerie, infoIdentificacaoCliente, infoFabricante, infoFaixaNominalNum, infoFaixaNominalUni, infoDivisaoResolucaoNum, infoDivisaoResolucaoUni, infoOrgaoResponsavel
+    FROM instrumentos
+    WHERE pk_idInstrumento = idInstrumento;
+END//
+DELIMITER ;
+CALL infosInstrumento(1, @fk_idCliente, @fk_idOs, @fk_idTipo, @nSerie, @identificacaoCliente, @fabricante, @faixaNominalNum, @faixaNominalUni, @divisaoResolucaoNum, @divisaoResolucaoUni, @orgaoResponsavel);
+SELECT @fk_idCliente AS fk_idCliente, @fk_idOs AS fk_idOs, @fk_idTipo AS fk_idTipo, @nSerie AS nSerie, @identificacaoCliente AS identificacaoCliente, @fabricante AS fabricante, @faixaNominalNum AS faixaNominalNum, @faixaNominalUni AS faixaNominalUni, @divisaoResolucaoNum AS divisaoResolucaoNum, @divisaoResolucaoUni AS divisaoResolucaoUni, @orgaoResponsavel AS orgaoResponsavel;
+drop procedure infosInstrumento;
+
+
 -- inserção de recebidos
 DELIMITER //
 CREATE PROCEDURE inserirRecebimento(
@@ -381,7 +418,7 @@ select * from recebidos;
 drop procedure recebimento;
 
 
--- alteração de instrumentos recebidos
+-- alteração de recebidos
 DELIMITER //
 CREATE PROCEDURE modificarRecebimento(
 	IN idRecebimento int,
@@ -416,7 +453,32 @@ BEGIN
 END // 
 DELIMITER ;
 call modificarRecebimento(2, 556, "vendas", 12341, 12344563, '2024-03-27', "sim", '2024-04-25', '2024-05-21', "sim", '2024-03-28', null, null);
-drop procedure modificarInstrumentosRecebidos;
+drop procedure modificarRecebimento;
+
+
+-- visualização dos recebidos
+drop procedure infosRecebidos;
+DELIMITER //
+CREATE PROCEDURE infosRecebidos(
+	IN idOrdem int,
+    OUT infoTipo enum("calibracao", "medicao"),
+    OUT infoContratante varchar(60),
+    OUT infoEmail varchar(60),
+    OUT infoTelefone varchar(11),
+    OUT infoCliente varchar(60)
+)
+BEGIN
+	SELECT os.tipo, os.contratante, os.email, os.telefone, c.nomeEmpresa
+    INTO infoTipo, infoContratante, infoEmail, infoTelefone, infoCliente
+    FROM ordensServico os
+    join clientes c
+    on os.fk_idCliente = c.pk_idCliente
+    WHERE os.pk_idOs = idOrdem;
+END // 
+DELIMITER ;
+CALL infosRecebidos(556, @infoTipo, @infoContratante, @infoEmail, @infoTelefone, @infoCliente);
+SELECT @infoTipo AS infoTipo, @infoContratante AS contratante, @infoEmail AS email, @infoTelefone AS telefone, @infoCliente AS Cliente;
+
 
 -- inserção de planeza
 DELIMITER //
@@ -709,6 +771,45 @@ BEGIN
 END // 
 DELIMITER ;
 call modificarResultadosMicrometros(745, 750, 1, 1, 1, 1, 1, 2, 3.2, "pol", '2024-03-21', "ok", "analogico", 9, 20.70, 20.5);
+
+
+-- visualizar informações do certificado
+drop procedure infoscertificado;
+DELIMITER //
+CREATE PROCEDURE infoscertificado(
+	IN idInstrumento int,
+	OUT idOrdem int,
+    OUT infoContratante varchar(60),
+    
+    OUT infoInstrumento varchar(60),
+    OUT infoFabricante varchar(60),
+    OUT infoNSerie int,
+    OUT infoIdentificacaoCliente varchar(50),
+    OUT infoFaixaNominalNum decimal(4,2),
+	OUT infoFaixaNominalUni enum("mm", "pol"),
+	OUT infoDivisaoResolucaoNum decimal(4,2),
+	OUT infoDivisaoResolucaoUni enum("mm", "pol"),
+    
+    OUT infoCliente varchar(60),
+    OUT infoEndereco varchar(100),
+	
+    OUT infoDataDeRecebimento date
+)
+BEGIN
+	SELECT os.pk_idOs, os.contratante, i.nome, i.fabricante, i.nSerie , i.identificacaoCliente, i.faixaNominalNum, i.faixaNominalUni, i.divisaoResolucaoNum, i.divisaoResolucaoUni, c.nomeEmpresa, c.endereco, r.dataDeRecebimento
+    INTO idOrdem, infoContratante, infoInstrumento, infoFabricante, infoNSerie, infoIdentificacaoCliente, infoFaixaNominalNum, infoFaixaNominalUni, infoDivisaoResolucaoNum, infoDivisaoResolucaoUni, infoCliente, infoEndereco, infoDataDeRecebimento
+    FROM instrumentos i
+    join ordensServico os
+    on i.fk_idOs = os.pk_idOs
+    join clientes c
+    on os.fk_idCliente = c.pk_idCliente
+    join recebidos r
+    on os.pk_idOs = r.fk_idOs
+    WHERE i.pk_idInstrumento = idInstrumento;
+END // 
+DELIMITER ;
+call infoscertificado(1, @idOrdem, @infoContratante, @infoInstrumento, @infoFabricante, @infoNSerie, @infoIdentificacaoCliente, @infoFaixaNominalNum, @infoFaixaNominalUni, @infoDivisaoResolucaoNum, @infoDivisaoResolucaoUni, @infoCliente, @infoEndereco, @infoDataDeRecebimento);
+select @idOrdem, @infoContratante, @infoInstrumento, @infoFabricante, @infoNSerie, @infoIdentificacaoCliente, @infoFaixaNominalNum, @infoFaixaNominalUni, @infoDivisaoResolucaoNum, @infoDivisaoResolucaoUni, @infoCliente, @infoEndereco, @infoDataDeRecebimento;
 
 
 -- inserção de medições internas
@@ -1092,8 +1193,6 @@ CREATE PROCEDURE criarResultadosPaquimetro(
     IN idMedProfundidade int,
     IN novoTecnico int,
     IN novoResponsável int,
-    IN novaFaixaCalibradaNum decimal(4,2),
-    IN novaFaixaCalibradaUni enum("mm", "pol"),
     IN novaDataCalibracao date,
     IN novaInspecao enum("ok", "nok"),
     IN novoTipoEscala enum("analogico", "digital"),
@@ -1102,11 +1201,11 @@ CREATE PROCEDURE criarResultadosPaquimetro(
     IN novoTempFinal decimal(4,2)
 )
 BEGIN
-	INSERT INTO resultadosPaquimetros(pk_idNrCertificado, fk_idInstrumento, fk_idParalelismoPaq, fk_idMedicaoExterna, fk_idMedicaointerna, fk_idMedicaoRessalto, fk_idMedicaoProfundidade, fk_idTecnico, fk_idResponsavel, faixaCalibradaNum, faixaCalibradaUni, dataCalibracao, inspecao, tipoEscala, versaoMetodo, tempInicial, tempFinal)
-    VALUES (nrCertificado, idInstrumento, idParalelismoPaq, idMedExterna, idMedInterna, idMedRessalto, idMedProfundidade, novoTecnico, novoResponsável, novaFaixaCalibradaNum, novaFaixaCalibradaUni, novaDataCalibracao, novaInspecao, novoTipoEscala, novaVersaoMetodo, novoTempInicial, novoTempFinal);
+	INSERT INTO resultadosPaquimetros(pk_idNrCertificado, fk_idInstrumento, fk_idParalelismoPaq, fk_idMedicaoExterna, fk_idMedicaointerna, fk_idMedicaoRessalto, fk_idMedicaoProfundidade, fk_idTecnico, fk_idResponsavel, dataCalibracao, inspecao, tipoEscala, versaoMetodo, tempInicial, tempFinal)
+    VALUES (nrCertificado, idInstrumento, idParalelismoPaq, idMedExterna, idMedInterna, idMedRessalto, idMedProfundidade, novoTecnico, novoResponsável, novaDataCalibracao, novaInspecao, novoTipoEscala, novaVersaoMetodo, novoTempInicial, novoTempFinal);
 END // 
 DELIMITER ;
-call criarResultadosPaquimetro(322, 1, 1, 1, 1, 1, 1, 1, 2, 5.8, "pol", '2024-03-25', "ok", "digital", 9, 22.5, 22);
+call criarResultadosPaquimetro(322, 1, 1, 1, 1, 1, 1, 1, 2, '2024-03-25', "ok", "digital", 9, 22.5, 22);
 select * from resultadosPaquimetros;
 drop procedure criarResultadosPaquimetro;
 
@@ -1124,8 +1223,6 @@ CREATE PROCEDURE modificarResultadosPaquimetro(
     IN idMedProfundidade int,
     IN alterarTecnico int,
     IN alterarResponsável int,
-    IN alterarFaixaCalibradaNum decimal(4,2),
-    IN alterarFaixaCalibradaUni enum("mm", "pol"),
     IN alterarDataCalibracao date,
     IN alterarInspecao enum("ok", "nok"),
     IN alterarTipoEscala enum("analogico", "digital"),
@@ -1144,8 +1241,6 @@ BEGIN
     fk_idMedicaoProfundidade = idMedProfundidade,
     fk_idTecnico = alterarTecnico,
     fk_idResponsavel = alterarResponsável,
-    faixaCalibradaNum = alterarFaixaCalibradaNum,
-    faixaCalibradaUni = alterarFaixaCalibradaUni,
     dataCalibracao = alterarDataCalibracao,
     inspecao = alterarInspecao,
     tipoEscala = alterarTipoEscala,
@@ -1155,12 +1250,7 @@ BEGIN
     WHERE pk_idNrCertificado = antigoNrCertificado;
 END // 
 DELIMITER ;
-call modificarResultadosPaquimetro(322, 350, 1, 1, 1, 1, 1, 1, 1, 2, 8.5, "mm", '2024-03-25', "nok", "analogico", 9, 22.5, 22);
-
-
--- precisamos criar um trigger para alterar o número do certificado caso eles alterem algum valor da calibração
-
--- também precisamos criar um trigger para caso eles alterem o id de uma ordem de serviço, também altere as fks que estão referenciando essa ordem
+call modificarResultadosPaquimetro(322, 350, 1, 1, 1, 1, 1, 1, 1, 2, '2024-03-25', "nok", "analogico", 9, 22.5, 22);
 
 
 -- cadastro de peças
@@ -1274,3 +1364,8 @@ BEGIN
 END // 
 DELIMITER ;
 call modificarRelatorio(23, 32, 665, 2, 1, '10:00', '18:00', '8:00', '25°C', '50%', 'Nenhuma observação', 'Laboratório A', '2024-03-24', 'Assinatura do técnico');
+
+
+-- precisamos criar um trigger para alterar o número do certificado caso eles alterem algum valor da calibração
+
+-- também precisamos criar um trigger para caso eles alterem o id de uma ordem de serviço, também altere as fks que estão referenciando essa ordem

@@ -62,24 +62,11 @@ CREATE TABLE recebidos(
     FOREIGN KEY(fk_idUsuario) REFERENCES usuarios(pk_idUsuario)
 );
 
-CREATE TABLE categorias(
-	pk_idCategoria int PRIMARY KEY AUTO_INCREMENT,
-    nome varchar(30) NOT NULL UNIQUE
-);
-
-CREATE TABLE tipos(
-	pk_idTipo int PRIMARY KEY AUTO_INCREMENT,
-    fk_idCategoria int NOT NULL,
-    nome varchar(30) NOT NULL UNIQUE,
-    
-    FOREIGN KEY(fk_idCategoria) REFERENCES categorias(pk_idCategoria)
-);
-
-CREATE TABLE instrumentos(     -- //
+CREATE TABLE instrumentos(
 	pk_idInstrumento int PRIMARY KEY AUTO_INCREMENT,
     fk_idCliente int NOT NULL,
     fk_idOs int NOT NULL,
-    fk_idTipo int NOT NULL,
+    nome varchar(60) NOT NULL,
     nSerie int NOT NULL,
     identificacaoCliente varchar(50) NOT NULL,
     fabricante varchar(60) NOT NULL,
@@ -90,8 +77,7 @@ CREATE TABLE instrumentos(     -- //
     orgaoResponsavel varchar(60),
     
     FOREIGN KEY(fk_idCliente) REFERENCES clientes(pk_idCliente),
-    FOREIGN KEY(fk_idOs) REFERENCES ordensServico(pk_idOs),
-    FOREIGN KEY(fk_idTipo) REFERENCES tipos(pk_idTipo)
+    FOREIGN KEY(fk_idOs) REFERENCES ordensServico(pk_idOs)
 );
 
 CREATE TABLE planeza(
@@ -289,8 +275,6 @@ CREATE TABLE resultadosPaquimetros(
     fk_idMedicaoProfundidade int NOT NULL,
     fk_idTecnico int NOT NULL,
     fk_idResponsavel int NOT NULL,
-    faixaCalibradaNum decimal(4,2) NOT NULL,
-    faixaCalibradaUni enum("mm", "pol") NOT NULL,
     dataCalibracao date NOT NULL,
     inspecao enum("ok", "nok") NOT NULL,
     tipoEscala enum("analogico", "digital") NOT NULL,
