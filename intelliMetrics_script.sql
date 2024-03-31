@@ -62,10 +62,16 @@ CREATE TABLE recebidos(
     FOREIGN KEY(fk_idUsuario) REFERENCES usuarios(pk_idUsuario)
 );
 
+CREATE TABLE categorias(
+	pk_idCategoria int  PRIMARY KEY AUTO_INCREMENT,
+    nome varchar(30) NOT NULL
+);
+
 CREATE TABLE instrumentos(
 	pk_idInstrumento int PRIMARY KEY AUTO_INCREMENT,
     fk_idCliente int NOT NULL,
     fk_idOs int NOT NULL,
+    fk_idCategoria int NOT NULL,
     nome varchar(60) NOT NULL,
     nSerie int NOT NULL,
     identificacaoCliente varchar(50) NOT NULL,
@@ -77,7 +83,8 @@ CREATE TABLE instrumentos(
     orgaoResponsavel varchar(60),
     
     FOREIGN KEY(fk_idCliente) REFERENCES clientes(pk_idCliente),
-    FOREIGN KEY(fk_idOs) REFERENCES ordensServico(pk_idOs)
+    FOREIGN KEY(fk_idOs) REFERENCES ordensServico(pk_idOs),
+    FOREIGN KEY(fk_idCategoria) REFERENCES categorias(pk_idCategoria)
 );
 
 CREATE TABLE planeza(
@@ -307,9 +314,9 @@ CREATE TABLE pecas(
 
 CREATE TABLE relatorio(
 	pk_idRelatorio int PRIMARY KEY,
-    fk_idOs int NOT NULL,
     fk_idInstrumento int NOT NULL,
     fk_idUsuario int NOT NULL,
+    fk_idPeca int NOT NULL,
     inicio time(0) NOT NULL,	-- o 'time(o)' faz com que a coluna receba apenas valores de hora e minuto. Devem ser inseridos dentro de aspas: '09:00'
     termino time(0) NOT NULL,
     tempoTotal time(0) NOT NULL,
@@ -320,9 +327,9 @@ CREATE TABLE relatorio(
     dia date NOT NULL,
     assinatura varchar(100) NOT NULL,
     
-    FOREIGN KEY (fk_idOs) REFERENCES ordensServico(pk_idOs),
     FOREIGN KEY (fk_idInstrumento) REFERENCES instrumentos(pk_idInstrumento),
-    FOREIGN KEY(fk_idUsuario) REFERENCES usuarios(pk_idUsuario)
+    FOREIGN KEY(fk_idUsuario) REFERENCES usuarios(pk_idUsuario),
+    FOREIGN KEY(fk_idPeca) REFERENCES pecas(pk_idPeca)
 );
 
 -- achar uma maneira de inserir a incerteza do instrumento

@@ -91,7 +91,7 @@ BEGIN
     WHERE pk_idUsuario = idUsuario;
 END//
 DELIMITER ;
-call infosUsuario(2, @nome, @email, @cargo, @status);
+call infosUsuario(1, @nome, @email, @cargo, @status);
 SELECT @nome AS nomeUsuario, @email AS emailUsuario, @cargo AS cargoUsuario, @status AS statusUsuario;
 
 
@@ -247,7 +247,7 @@ BEGIN
     WHERE pk_idOs = idAntigo;
 END // 
 DELIMITER ;
-call modificarOrdem(556, 45, 1, 1, "banana", "medicao", "cabou banana", '2024-04-27', "Bill Gates", "gatesbill@gmail.com", 11902345567);
+call modificarOrdem(45, 556, 1, 2, "banana", "calibracao", "cabou banana", '2024-04-27', "Bill Gates", "gatesbill@gmail.com", 11902345567);
 select * from ordensServico;
 
 
@@ -276,7 +276,7 @@ BEGIN
     WHERE pk_idOs = idOrdem;
 END // 
 DELIMITER ;
-call desmarcarOrdemComoConcluida(45);
+call desmarcarOrdemComoConcluida(556);
 
 
 -- retornar informações da ordem de serviço
@@ -294,7 +294,8 @@ CREATE PROCEDURE infosOrdens(
     OUT contratanteOs VARCHAR(60),
     OUT emailOs VARCHAR(60),
     OUT telefoneOs VARCHAR(11),
-    OUT statusOs ENUM('em espera', 'concluida'))
+    OUT statusOs ENUM('em espera', 'concluida')
+)
 BEGIN
     SELECT pk_idOs, fk_idCliente, fk_idUsuario, titulo, tipo, descricao, dataInicio, dataTermino, contratante, email, telefone, status
     INTO idOsResultado, fk_idClienteOs, fk_idUsuarioOs, tituloOs, tipoOs, descricaoOs, dataInicioOs, dataTerminoOs, contratanteOs, emailOs, telefoneOs, statusOs
@@ -306,11 +307,38 @@ CALL infosOrdens(665, @idOs, @fk_idCliente, @fk_idUsuario, @titulo, @tipo, @desc
 SELECT @idOs AS idOsResultado, @fk_idCliente AS fk_idClienteOs, @fk_idUsuario AS fk_idUsuarioOs, @titulo AS tituloOs, @tipo AS tipoOs, @descricao AS descricaoOs, @dataInicio AS dataInicioOs, @dataTermino AS dataTerminoOs, @contratante AS contratanteOs, @email AS emailOs, @telefone AS telefoneOs, @status AS statusOs;
 
 
+-- cadastrar categorias
+DELIMITER //
+CREATE PROCEDURE cadastrarCategoria(
+	IN novaCategoria varchar(30)
+)
+BEGIN
+	INSERT INTO categorias(nome) VALUES (novaCategoria);
+END//
+DELIMITER ;
+call cadastrarCategoria("Paquímetro");
+
+
+-- alterar categoria
+DELIMITER //
+CREATE PROCEDURE modificarCategoria(
+	IN idCategoria int,
+	IN alterarCategoria varchar(30)
+)
+BEGIN
+	UPDATE categorias
+    SET nome = alterarCategoria
+    WHERE pk_idCategoria = alterarCategoria;
+END//
+DELIMITER ;
+
+
 -- cadastro de instrumentos
 DELIMITER //
 CREATE PROCEDURE cadastrarInstrumento(
     IN idCliente int,
     IN idOrdem int,
+    IN idCategoria int,
     IN novoNome varchar(60),
     IN novoNSerie int,
     IN novaIdentificacaoCliente int,
@@ -321,11 +349,11 @@ CREATE PROCEDURE cadastrarInstrumento(
     IN novaDivisaoUni enum('mm', 'pol')
 )
 BEGIN
-    INSERT INTO instrumentos(fk_idCliente, fk_idOs, nome, nSerie, identificacaoCliente, fabricante, faixaNominalNum, faixaNominalUni, divisaoResolucaoNum, divisaoResolucaoUni)
-    VALUES (idCliente, idOrdem, novoNome, novoNSerie, novaIdentificacaoCliente, novoFabricante, novaFaixaNominalNum, novaFaixaNominalUnidade, novaDivisaoNum, novaDivisaoUni);
+    INSERT INTO instrumentos(fk_idCliente, fk_idOs, fk_idCategoria, nome, nSerie, identificacaoCliente, fabricante, faixaNominalNum, faixaNominalUni, divisaoResolucaoNum, divisaoResolucaoUni)
+    VALUES (idCliente, idOrdem, idCategoria, novoNome, novoNSerie, novaIdentificacaoCliente, novoFabricante, novaFaixaNominalNum, novaFaixaNominalUnidade, novaDivisaoNum, novaDivisaoUni);
 END //
 DELIMITER ;
-call cadastrarInstrumento(1, 556, "Paquímetro retardado", 112233, 1222333,  "Martelos e machados", 1.2, "mm", 2.43, "mm");
+call cadastrarInstrumento(1, 556, 1, "Paquímetro universal", 112233, 1222333,  "Martelos e machados", 1.2, "mm", 2.43, "mm");
 select * from instrumentos;
 
 
@@ -335,7 +363,8 @@ CREATE PROCEDURE modificarInstrumento(
     IN idInstrumento INT,
     IN idCliente INT,
     IN idOsCalibracao INT,
-    IN idTipo INT,
+    IN idCategoria INT,
+    IN alterarNome VARCHAR(60),
     IN alterarNSerie INT,
 	IN alterarIdentificacaoCliente int,
     IN alterarFabricante VARCHAR(60),
@@ -348,7 +377,8 @@ BEGIN
     UPDATE instrumentos
     SET fk_idCliente = idCliente,
     fk_idOs = idOsCalibracao,
-    fk_idTipo = idTipo,
+    fk_idCategoria = idCategoria,
+    nome = alterarNome,
     nSerie = alterarNSerie,
     identificacaoCliente = alterarIdentificacaoCliente,
 	fabricante = alterarFabricante,
@@ -359,7 +389,7 @@ BEGIN
     WHERE pk_idinstrumento = idInstrumento;
 END //
 DELIMITER ;
-call modificarInstrumento(1, 1, 556, 1, 112233, 111232, "Machados e Martelos", 2.21, "pol", 5.32, "mm");
+call modificarInstrumento(1, 1, 556, 1, "Paquímetro cromado", 112233, 111232, "Machados e Martelos", 2.21, "pol", 5.32, "mm");
 
 
 -- retornar informações de instrumento
@@ -368,6 +398,7 @@ CREATE PROCEDURE infosInstrumento(
 	IN idInstrumento INT,
     OUT idCliente INT,
     OUT idOs INT,
+    OUT idCategoria INT,
     OUT infoNome varchar(60),
     OUT infoNSerie INT,
     OUT infoIdentificacaoCliente VARCHAR(50),
@@ -379,14 +410,14 @@ CREATE PROCEDURE infosInstrumento(
     OUT infoOrgaoResponsavel VARCHAR(60)
 )
 BEGIN
-    SELECT fk_idCliente, fk_idOs, nome, nSerie, identificacaoCliente, fabricante, faixaNominalNum, faixaNominalUni, divisaoResolucaoNum, divisaoResolucaoUni, orgaoResponsavel
-    INTO idCliente, idOs, infoNome, infoNSerie, infoIdentificacaoCliente, infoFabricante, infoFaixaNominalNum, infoFaixaNominalUni, infoDivisaoResolucaoNum, infoDivisaoResolucaoUni, infoOrgaoResponsavel
+    SELECT fk_idCliente, fk_idOs, fk_idCategoria, nome, nSerie, identificacaoCliente, fabricante, faixaNominalNum, faixaNominalUni, divisaoResolucaoNum, divisaoResolucaoUni, orgaoResponsavel
+    INTO idCliente, idOs, idCategoria, infoNome, infoNSerie, infoIdentificacaoCliente, infoFabricante, infoFaixaNominalNum, infoFaixaNominalUni, infoDivisaoResolucaoNum, infoDivisaoResolucaoUni, infoOrgaoResponsavel
     FROM instrumentos
     WHERE pk_idInstrumento = idInstrumento;
 END//
 DELIMITER ;
-CALL infosInstrumento(1, @fk_idCliente, @fk_idOs, @fk_idTipo, @nSerie, @identificacaoCliente, @fabricante, @faixaNominalNum, @faixaNominalUni, @divisaoResolucaoNum, @divisaoResolucaoUni, @orgaoResponsavel);
-SELECT @fk_idCliente AS fk_idCliente, @fk_idOs AS fk_idOs, @fk_idTipo AS fk_idTipo, @nSerie AS nSerie, @identificacaoCliente AS identificacaoCliente, @fabricante AS fabricante, @faixaNominalNum AS faixaNominalNum, @faixaNominalUni AS faixaNominalUni, @divisaoResolucaoNum AS divisaoResolucaoNum, @divisaoResolucaoUni AS divisaoResolucaoUni, @orgaoResponsavel AS orgaoResponsavel;
+CALL infosInstrumento(1, @fk_idCliente, @fk_idOs, @fk_idCategoria, @nome, @nSerie, @identificacaoCliente, @fabricante, @faixaNominalNum, @faixaNominalUni, @divisaoResolucaoNum, @divisaoResolucaoUni, @orgaoResponsavel);
+SELECT @fk_idCliente AS fk_idCliente, @fk_idOs AS fk_idOs, @fk_idCategoria AS Categoria, @nome AS Instruemnto, @nSerie AS nSerie, @identificacaoCliente AS identificacaoCliente, @fabricante AS fabricante, @faixaNominalNum AS faixaNominalNum, @faixaNominalUni AS faixaNominalUni, @divisaoResolucaoNum AS divisaoResolucaoNum, @divisaoResolucaoUni AS divisaoResolucaoUni, @orgaoResponsavel AS orgaoResponsavel;
 drop procedure infosInstrumento;
 
 
@@ -476,7 +507,7 @@ BEGIN
     WHERE os.pk_idOs = idOrdem;
 END // 
 DELIMITER ;
-CALL infosRecebidos(556, @infoTipo, @infoContratante, @infoEmail, @infoTelefone, @infoCliente);
+CALL infosRecebidos(665, @infoTipo, @infoContratante, @infoEmail, @infoTelefone, @infoCliente);
 SELECT @infoTipo AS infoTipo, @infoContratante AS contratante, @infoEmail AS email, @infoTelefone AS telefone, @infoCliente AS Cliente;
 
 
@@ -997,7 +1028,7 @@ DELIMITER ;
 CALL alterarMedicaoProfundidade(1, 2.0, 2.1, 2.2, 2.3, 3.0, 3.1, 3.2, 3.3, 4.0, 4.1, 4.2, 4.3);
 
 
--- Inserção de paralelismo do micrômetro
+-- Inserção de paralelismo do PAQUÍMETRO
 DELIMITER //
 CREATE PROCEDURE inserirParalelismoPaq(
     IN novoValorNominalOrelha decimal(6,3),
@@ -1300,13 +1331,35 @@ call alterarPeca(1, 665, 1, 'Parafuso', 'Metal', 12345, 'Parafuso ta torto');
 drop procedure alterarPeca;
 
 
+-- visualização das peças
+DELIMITER //
+CREATE PROCEDURE infosPeca(
+	IN idPeca int,
+    OUT idOrdem int,
+    OUT idCliente int,
+    OUT infoNome varchar(60),
+	OUT infoMaterial varchar(60),
+    OUT infonDesenho int,
+    OUT infoDescricao varchar(300)
+)
+BEGIN
+	SELECT fk_idOs, fk_idCliente, nome, material, nDesenho, descricao
+    INTO idOrdem, idCliente, infoNome, infoMaterial, infonDesenho, infoDescricao
+    FROM pecas
+    WHERE pk_idPeca = idPeca;
+END //
+DELIMITER ;
+call infosPeca(2, @idOrdem, @idCliente, @infoNome, @infoMaterial, @infonDesenho, @infoDescricao);
+SELECT @idOrdem AS OrdemDeServiço, @idCliente AS Cliente, @infoNome AS Peça, @infoMaterial AS Material, @infonDesenho AS NumDesenho, @infoDescricao AS Descrição;
+
+
 -- criação de relatório
 DELIMITER //
 CREATE PROCEDURE criarRelatorio (
 	IN idRelatorio int,
-    IN idOs int,
     IN idInstrumento int,
     IN idUsuario int,
+    IN idPeca int,
     IN novoInicio time,
     IN novoTermino time,
     IN novoTempoTotal time,
@@ -1318,11 +1371,11 @@ CREATE PROCEDURE criarRelatorio (
     IN novaAssinatura varchar(100)
 )
 BEGIN
-    INSERT INTO relatorio (pk_idRelatorio, fk_idOs, fk_idInstrumento, fk_idUsuario, inicio, termino, tempoTotal, temperaturaC, umidadeRelativa, observacoes, localDaMedicao, dia, assinatura)
-    VALUES (idRelatorio, idOs, idInstrumento, idUsuario, novoInicio, novoTermino, novoTempoTotal, novoTemperaturaC, novaUmidadeRelativa, novoObservacoes, novoLocalDaMedicao, novoDia, novaAssinatura);
+    INSERT INTO relatorio (pk_idRelatorio, fk_idInstrumento, fk_idUsuario, fk_idPeca, inicio, termino, tempoTotal, temperaturaC, umidadeRelativa, observacoes, localDaMedicao, dia, assinatura)
+    VALUES (idRelatorio, idInstrumento, idUsuario, idPeca, novoInicio, novoTermino, novoTempoTotal, novoTemperaturaC, novaUmidadeRelativa, novoObservacoes, novoLocalDaMedicao, novoDia, novaAssinatura);
 END //
 DELIMITER ;
-call criarRelatorio(23, 665, 2, 1, '09:00', '17:00', '26:00', '25°C', '50%', 'Nenhuma observação', 'Laboratório A', '2024-03-24', 'Assinatura do técnico');
+call criarRelatorio(22, 1, 1, 1, '09:00', '17:00', '26:00', '25°C', '50%', 'Nenhuma observação', 'Laboratório A', '2024-03-24', 'Assinatura do técnico');
 select * from relatorio;
 drop procedure criarRelatorio;
 
@@ -1332,9 +1385,9 @@ DELIMITER //
 CREATE PROCEDURE modificarRelatorio(
 	IN antigoIdRelatorio int,
 	IN alterarIdRelatorio int,
-    IN idOs int,
     IN idInstrumento int,
     IN idUsuario int,
+    IN idPeca int,
     IN alterarInicio time,
     IN alterarTermino time,
     IN alterarTempoTotal time,
@@ -1348,9 +1401,9 @@ CREATE PROCEDURE modificarRelatorio(
 BEGIN
 	UPDATE relatorio
     SET pk_idRelatorio = alterarIdRelatorio,
-    fk_idOs = idOs,
     fk_idInstrumento = idInstrumento,
     fk_idUsuario = idUsuario,
+    fk_idPeca = idPeca,
     inicio = alterarInicio,
     termino = alterarTermino,
     tempoTotal = alterarTempoTotal,
@@ -1363,9 +1416,85 @@ BEGIN
     WHERE pk_idRelatorio = antigoIdRelatorio;
 END // 
 DELIMITER ;
-call modificarRelatorio(23, 32, 665, 2, 1, '10:00', '18:00', '8:00', '25°C', '50%', 'Nenhuma observação', 'Laboratório A', '2024-03-24', 'Assinatura do técnico');
+call modificarRelatorio(23, 32, 1, 1, 1, '10:00', '18:00', '8:00', '25°C', '50%', 'Nenhuma observação', 'Laboratório A', '2024-03-24', 'Assinatura do técnico');
 
+
+-- retornar relatório
+drop procedure infosRelatorio;
+DELIMITER //
+CREATE PROCEDURE infosRelatorio(
+	IN idPeca int,
+    OUT infoUsuario varchar(60),
+    OUT infoPeca varchar(60),
+    OUT infoMaterial varchar(60),
+    OUT infoNDesenho int,
+    OUT infoDescricao varchar(300)
+)
+BEGIN
+	SELECT u.nome, p.nome, p.material, p.nDesenho, p.descricao
+    INTO infoUsuario, infoPeca, infoMaterial, infoNDesenho, infoDescricao
+    FROM pecas p
+    join ordensServico os
+    on p.fk_idOs = os.pk_idOs
+    join usuarios u
+    on os.fk_idUsuario = u.pk_idUsuario
+    WHERE p.pk_idPeca = idPeca;
+END //
+DELIMITER ;
+call infosRelatorio(1, @infoUsuario, @infoPeca, @infoMaterial, @infoNDesenho, @infoDescricao);
+SELECT @infoUsuario AS Usuario, @infoPeca AS Peça, @infoMaterial AS Material, @infoNDesenho AS NumDesenho, @infoDescricao AS Descricao;
+
+
+-- Abaixo estão alguns triggers para melhorar a funcionamento do banco de dados
 
 -- precisamos criar um trigger para alterar o número do certificado caso eles alterem algum valor da calibração
 
 -- também precisamos criar um trigger para caso eles alterem o id de uma ordem de serviço, também altere as fks que estão referenciando essa ordem
+
+-- Trigger para alterar a fk de recebidos
+DELIMITER //
+CREATE TRIGGER atualizarFkRecebidos
+AFTER UPDATE ON ordensServico
+FOR EACH ROW
+BEGIN
+    IF OLD.pk_idOs <> NEW.pk_idOs THEN
+        UPDATE recebidos
+        SET fk_idOs = NEW.pk_idOs
+        WHERE fk_idOs = OLD.pk_idOs;
+    END IF;
+END;
+//
+DELIMITER ;
+DROP TRIGGER IF EXISTS atualizarFkRecebidos;
+
+-- Trigger para alterar a fk de instrumentos
+DELIMITER //
+CREATE TRIGGER atualizarFkInstrumentos
+AFTER UPDATE ON ordensServico
+FOR EACH ROW
+BEGIN
+    IF OLD.pk_idOs <> NEW.pk_idOs THEN
+        UPDATE instrumentos
+        SET fk_idOs = NEW.pk_idOs
+        WHERE fk_idOs = OLD.pk_idOs;
+    END IF;
+END;
+//
+DELIMITER ;
+DROP TRIGGER IF EXISTS atualizarFkInstrumentos;
+
+-- Trigger para alterar a fk de peças
+DELIMITER //
+CREATE TRIGGER atualizarFkPecas
+AFTER UPDATE ON ordensServico
+FOR EACH ROW
+BEGIN
+    IF OLD.pk_idOs <> NEW.pk_idOs THEN
+        UPDATE pecas
+        SET fk_idOs = NEW.pk_idOs
+        WHERE fk_idOs = OLD.pk_idOs;
+    END IF;
+END;
+//
+DELIMITER ;
+DROP TRIGGER IF EXISTS atualizarFkPecas;
