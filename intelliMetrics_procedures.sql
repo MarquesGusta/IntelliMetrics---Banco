@@ -19,7 +19,7 @@ select * from usuarios;
 DELIMITER //
 CREATE PROCEDURE redefinirSenha(
 	IN emailUsuario varchar(60),
-	IN novaSenha varchar(10)
+	IN novaSenha varchar(20)
 )
 BEGIN
 	UPDATE usuarios
@@ -343,17 +343,18 @@ CREATE PROCEDURE cadastrarInstrumento(
     IN novoNSerie int,
     IN novaIdentificacaoCliente int,
     IN novoFabricante varchar(60),
-	IN novaFaixaNominalNum decimal(4,2),
+	IN novaFaixaNominalNum enum("0-25", "25-50", "50-75", "75-100", "100-125", "125-150", "150-175", "175-200", "1-25"),
     IN novaFaixaNominalUnidade enum('mm', 'pol'),
     IN novaDivisaoNum decimal(4,2),
-    IN novaDivisaoUni enum('mm', 'pol')
+    IN novaDivisaoUni enum('mm', 'pol'),
+    IN novoOrgao varchar(60)
 )
 BEGIN
-    INSERT INTO instrumentos(fk_idCliente, fk_idOs, fk_idCategoria, nome, nSerie, identificacaoCliente, fabricante, faixaNominalNum, faixaNominalUni, divisaoResolucaoNum, divisaoResolucaoUni)
-    VALUES (idCliente, idOrdem, idCategoria, novoNome, novoNSerie, novaIdentificacaoCliente, novoFabricante, novaFaixaNominalNum, novaFaixaNominalUnidade, novaDivisaoNum, novaDivisaoUni);
+    INSERT INTO instrumentos(fk_idCliente, fk_idOs, fk_idCategoria, nome, nSerie, identificacaoCliente, fabricante, faixaNominalNum, faixaNominalUni, divisaoResolucaoNum, divisaoResolucaoUni, orgaoResponsavel)
+    VALUES (idCliente, idOrdem, idCategoria, novoNome, novoNSerie, novaIdentificacaoCliente, novoFabricante, novaFaixaNominalNum, novaFaixaNominalUnidade, novaDivisaoNum, novaDivisaoUni, novoOrgao);
 END //
 DELIMITER ;
-call cadastrarInstrumento(1, 556, 1, "Paquímetro universal", 112233, 1222333,  "Martelos e machados", 1.2, "mm", 2.43, "mm");
+call cadastrarInstrumento(1, 556, 1, "Paquímetro universal", 112233, 1222333,  "Martelos e machados", "75-100", "mm", 2.43, "mm", "Martelos wakanda");
 select * from instrumentos;
 
 
@@ -368,10 +369,11 @@ CREATE PROCEDURE modificarInstrumento(
     IN alterarNSerie INT,
 	IN alterarIdentificacaoCliente int,
     IN alterarFabricante VARCHAR(60),
-    IN alterarFaixaNominalNum decimal(4,2),
+    IN alterarFaixaNominalNum enum("0-25", "25-50", "50-75", "75-100", "100-125", "125-150", "150-175", "175-200", "1-25"),
     IN alterarFaixaNominalUnidade enum('mm', 'pol'),
     IN alterarDivisaoNum decimal(4,2),
-    IN alterarDivisaoUni enum('mm', 'pol')
+    IN alterarDivisaoUni enum('mm', 'pol'),
+    IN alterarOrgao varchar(60)
 )
 BEGIN
     UPDATE instrumentos
@@ -389,7 +391,7 @@ BEGIN
     WHERE pk_idinstrumento = idInstrumento;
 END //
 DELIMITER ;
-call modificarInstrumento(1, 1, 556, 1, "Paquímetro cromado", 112233, 111232, "Machados e Martelos", 2.21, "pol", 5.32, "mm");
+call modificarInstrumento(1, 1, 556, 1, "Paquímetro cromado", 112233, 111232, "Machados e Martelos", "25-50", "pol", 5.32, "mm", "Martelos Stark");
 
 
 -- retornar informações de instrumento
@@ -403,7 +405,7 @@ CREATE PROCEDURE infosInstrumento(
     OUT infoNSerie INT,
     OUT infoIdentificacaoCliente VARCHAR(50),
     OUT infoFabricante VARCHAR(60),
-    OUT infoFaixaNominalNum DECIMAL(4,2),
+    OUT infoFaixaNominalNum enum("0-25", "25-50", "50-75", "75-100", "100-125", "125-150", "150-175", "175-200", "1-25"),
     OUT infoFaixaNominalUni ENUM('mm', 'pol'),
     OUT infoDivisaoResolucaoNum DECIMAL(4,2),
     OUT infoDivisaoResolucaoUni ENUM('mm', 'pol'),
@@ -611,46 +613,57 @@ call modificarParalelismoMicro(1, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9);
 -- inserção de controle dimensional
 DELIMITER //
 CREATE PROCEDURE criarControleDimensional(
-	IN novovp0_0_1 decimal(6,3),
-	IN novovp0_0_2 decimal(6,3),
-	IN novovp0_0_3 decimal(6,3),
-	IN novovp2_5_1 decimal(6,3),
-	IN novovp2_5_2 decimal(6,3),
-	IN novovp2_5_3 decimal(6,3),
-	IN novovp5_1_1 decimal(6,3),
-	IN novovp5_1_2 decimal(6,3),
-	IN novovp5_1_3 decimal(6,3),
-	IN novovp7_7_1 decimal(6,3),
-	IN novovp7_7_2 decimal(6,3),
-	IN novovp7_7_3 decimal(6,3),
-	IN novovp10_3_1 decimal(6,3),
-	IN novovp10_3_2 decimal(6,3),
-	IN novovp10_3_3 decimal(6,3),
-	IN novovp12_9_1 decimal(6,3),
-	IN novovp12_9_2 decimal(6,3),
-	IN novovp12_9_3 decimal(6,3),
-	IN novovp15_0_1 decimal(6,3),
-	IN novovp15_0_2 decimal(6,3),
-	IN novovp15_0_3 decimal(6,3),
-	IN novovp17_6_1 decimal(6,3),
-	IN novovp17_6_2 decimal(6,3),
-	IN novovp17_6_3 decimal(6,3),
-	IN novovp20_2_1 decimal(6,3),
-	IN novovp20_2_2 decimal(6,3),
-	IN novovp20_2_3 decimal(6,3),
-	IN novovp22_8_1 decimal(6,3),
-	IN novovp22_8_2 decimal(6,3),
-	IN novovp22_8_3 decimal(6,3),
-	IN novovp25_0_1 decimal(6,3),
-	IN novovp25_0_2 decimal(6,3),
-	IN novovp25_0_3 decimal(6,3)
+	IN novoVp1 decimal(6,3),
+    IN novoVp1_1 decimal(6,3),
+    IN novoVp1_2 decimal(6,3),
+    IN novoVp1_3 decimal(6,3),
+    IN novoVp2 decimal(6,3),
+    IN novoVp2_1 decimal(6,3),
+    IN novoVp2_2 decimal(6,3),
+    IN novoVp2_3 decimal(6,3),
+    IN novoVp3 decimal(6,3),
+    IN novoVp3_1 decimal(6,3),
+    IN novoVp3_2 decimal(6,3),
+    IN novoVp3_3 decimal(6,3),
+    IN novoVp4 decimal(6,3),
+    IN novoVp4_1 decimal(6,3),
+    IN novoVp4_2 decimal(6,3),
+    IN novoVp4_3 decimal(6,3),
+    IN novoVp5 decimal(6,3),
+    IN novoVp5_1 decimal(6,3),
+    IN novoVp5_2 decimal(6,3),
+    IN novoVp5_3 decimal(6,3),
+    IN novoVp6 decimal(6,3),
+    IN novoVp6_1 decimal(6,3),
+    IN novoVp6_2 decimal(6,3),
+    IN novoVp6_3 decimal(6,3),
+    IN novoVp7 decimal(6,3),
+    IN novoVp7_1 decimal(6,3),
+    IN novoVp7_2 decimal(6,3),
+    IN novoVp7_3 decimal(6,3),
+    IN novoVp8 decimal(6,3),
+    IN novoVp8_1 decimal(6,3),
+    IN novoVp8_2 decimal(6,3),
+    IN novoVp8_3 decimal(6,3),
+    IN novoVp9 decimal(6,3),
+    IN novoVp9_1 decimal(6,3),
+    IN novoVp9_2 decimal(6,3),
+    IN novoVp9_3 decimal(6,3),
+    IN novoVp10 decimal(6,3),
+    IN novoVp10_1 decimal(6,3),
+    IN novoVp10_2 decimal(6,3),
+    IN novoVp10_3 decimal(6,3),
+    IN novoVp11 decimal(6,3),
+    IN novoVp11_1 decimal(6,3),
+    IN novoVp11_2 decimal(6,3),
+    IN novoVp11_3 decimal(6,3)
 )
 BEGIN
-	INSERT INTO controleDimensional( vp0_0_1, vp0_0_2, vp0_0_3, vp2_5_1, vp2_5_2, vp2_5_3, vp5_1_1, vp5_1_2, vp5_1_3, vp7_7_1, vp7_7_2, vp7_7_3, vp10_3_1, vp10_3_2, vp10_3_3, vp12_9_1, vp12_9_2, vp12_9_3, vp15_0_1, vp15_0_2, vp15_0_3, vp17_6_1, vp17_6_2, vp17_6_3, vp20_2_1, vp20_2_2, vp20_2_3, vp22_8_1, vp22_8_2, vp22_8_3, vp25_0_1, vp25_0_2, vp25_0_3)
-    VALUES (novovp0_0_1, novovp0_0_2, novovp0_0_3, novovp2_5_1, novovp2_5_2, novovp2_5_3, novovp5_1_1, novovp5_1_2, novovp5_1_3, novovp7_7_1, novovp7_7_2, novovp7_7_3, novovp10_3_1, novovp10_3_2, novovp10_3_3, novovp12_9_1, novovp12_9_2, novovp12_9_3, novovp15_0_1, novovp15_0_2, novovp15_0_3, novovp17_6_1, novovp17_6_2, novovp17_6_3, novovp20_2_1, novovp20_2_2, novovp20_2_3, novovp22_8_1, novovp22_8_2, novovp22_8_3, novovp25_0_1, novovp25_0_2, novovp25_0_3);
+	INSERT INTO controleDimensional(vp1, vp1_1, vp1_2, vp1_3, vp2, vp2_1, vp2_2, vp2_3, vp3, vp3_1, vp3_2, vp3_3, vp4, vp4_1, vp4_2, vp4_3, vp5, vp5_1, vp5_2, vp5_3, vp6, vp6_1, vp6_2, vp6_3, vp7,vp7_1, vp7_2, vp7_3, vp8, vp8_1, vp8_2, vp8_3, vp9, vp9_1, vp9_2, vp9_3, vp10, vp10_1, vp10_2, vp10_3, vp11, vp11_1, vp11_2, vp11_3)
+    VALUES ( novoVp1, novoVp1_1, novoVp1_2, novoVp1_3, novoVp2, novoVp2_1, novoVp2_2, novoVp2_3, novoVp3, novoVp3_1, novoVp3_2, novoVp3_3, novoVp4, novoVp4_1, novoVp4_2, novoVp4_3, novoVp5, novoVp5_1, novoVp5_2, novoVp5_3, novoVp6, novoVp6_1, novoVp6_2, novoVp6_3, novoVp7, novoVp7_1, novoVp7_2, novoVp7_3, novoVp8, novoVp8_1, novoVp8_2, novoVp8_3, novoVp9, novoVp9_1, novoVp9_2, novoVp9_3, novoVp10, novoVp10_1, novoVp10_2, novoVp10_3, novoVp11, novoVp11_1, novoVp11_2, novoVp11_3);
 END // 
 DELIMITER ;
-call criarControleDimensional(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 , 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33);
+call criarControleDimensional(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 , 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44);
 select * from controleDimensional;
 
 
@@ -658,79 +671,101 @@ select * from controleDimensional;
 DELIMITER //
 CREATE PROCEDURE modificarControleDimensional(
 	IN idControle int,
-	IN alterarvp0_0_1 decimal(6,3),
-	IN alterarvp0_0_2 decimal(6,3),
-	IN alterarvp0_0_3 decimal(6,3),
-	IN alterarvp2_5_1 decimal(6,3),
-	IN alterarvp2_5_2 decimal(6,3),
-	IN alterarvp2_5_3 decimal(6,3),
-	IN alterarvp5_1_1 decimal(6,3),
-	IN alterarvp5_1_2 decimal(6,3),
-	IN alterarvp5_1_3 decimal(6,3),
-	IN alterarvp7_7_1 decimal(6,3),
-	IN alterarvp7_7_2 decimal(6,3),
-	IN alterarvp7_7_3 decimal(6,3),
-	IN alterarvp10_3_1 decimal(6,3),
-	IN alterarvp10_3_2 decimal(6,3),
-	IN alterarvp10_3_3 decimal(6,3),
-	IN alterarvp12_9_1 decimal(6,3),
-	IN alterarvp12_9_2 decimal(6,3),
-	IN alterarvp12_9_3 decimal(6,3),
-	IN alterarvp15_0_1 decimal(6,3),
-	IN alterarvp15_0_2 decimal(6,3),
-	IN alterarvp15_0_3 decimal(6,3),
-	IN alterarvp17_6_1 decimal(6,3),
-	IN alterarvp17_6_2 decimal(6,3),
-	IN alterarvp17_6_3 decimal(6,3),
-	IN alterarvp20_2_1 decimal(6,3),
-	IN alterarvp20_2_2 decimal(6,3),
-	IN alterarvp20_2_3 decimal(6,3),
-	IN alterarvp22_8_1 decimal(6,3),
-	IN alterarvp22_8_2 decimal(6,3),
-	IN alterarvp22_8_3 decimal(6,3),
-	IN alterarvp25_0_1 decimal(6,3),
-	IN alterarvp25_0_2 decimal(6,3),
-	IN alterarvp25_0_3 decimal(6,3)
+	IN alterarVp1 decimal(6,3),
+    IN alterarVp1_1 decimal(6,3),
+    IN alterarVp1_2 decimal(6,3),
+    IN alterarVp1_3 decimal(6,3),
+    IN alterarVp2 decimal(6,3),
+    IN alterarVp2_1 decimal(6,3),
+    IN alterarVp2_2 decimal(6,3),
+    IN alterarVp2_3 decimal(6,3),
+    IN alterarVp3 decimal(6,3),
+    IN alterarVp3_1 decimal(6,3),
+    IN alterarVp3_2 decimal(6,3),
+    IN alterarVp3_3 decimal(6,3),
+    IN alterarVp4 decimal(6,3),
+    IN alterarVp4_1 decimal(6,3),
+    IN alterarVp4_2 decimal(6,3),
+    IN alterarVp4_3 decimal(6,3),
+    IN alterarVp5 decimal(6,3),
+    IN alterarVp5_1 decimal(6,3),
+    IN alterarVp5_2 decimal(6,3),
+    IN alterarVp5_3 decimal(6,3),
+    IN alterarVp6 decimal(6,3),
+    IN alterarVp6_1 decimal(6,3),
+    IN alterarVp6_2 decimal(6,3),
+    IN alterarVp6_3 decimal(6,3),
+    IN alterarVp7 decimal(6,3),
+    IN alterarVp7_1 decimal(6,3),
+    IN alterarVp7_2 decimal(6,3),
+    IN alterarVp7_3 decimal(6,3),
+    IN alterarVp8 decimal(6,3),
+    IN alterarVp8_1 decimal(6,3),
+    IN alterarVp8_2 decimal(6,3),
+    IN alterarVp8_3 decimal(6,3),
+    IN alterarVp9 decimal(6,3),
+    IN alterarVp9_1 decimal(6,3),
+    IN alterarVp9_2 decimal(6,3),
+    IN alterarVp9_3 decimal(6,3),
+    IN alterarVp10 decimal(6,3),
+    IN alterarVp10_1 decimal(6,3),
+    IN alterarVp10_2 decimal(6,3),
+    IN alterarVp10_3 decimal(6,3),
+    IN alterarVp11 decimal(6,3),
+    IN alterarVp11_1 decimal(6,3),
+    IN alterarVp11_2 decimal(6,3),
+    IN alterarVp11_3 decimal(6,3)
 )
 BEGIN
 	UPDATE controleDimensional
-    SET vp0_0_1 =  alterarvp0_0_1,
-	vp0_0_2 = alterarvp0_0_2,
-	vp0_0_3 = alterarvp0_0_3,
-	vp2_5_1 = alterarvp2_5_1,
-	vp2_5_2 = alterarvp2_5_2,
-	vp2_5_3 = alterarvp2_5_3,
-	vp5_1_1 = alterarvp5_1_1,
-	vp5_1_2 = alterarvp5_1_2,
-	vp5_1_3 = alterarvp5_1_3,
-	vp7_7_1 = alterarvp7_7_1,
-	vp7_7_2 = alterarvp7_7_2,
-	vp7_7_3 = alterarvp7_7_3,
-	vp10_3_1 = alterarvp10_3_1,
-	vp10_3_2 = alterarvp10_3_2,
-	vp10_3_3 = alterarvp10_3_3,
-	vp12_9_1 = alterarvp12_9_1,
-	vp12_9_2 = alterarvp12_9_2,
-	vp12_9_3 = alterarvp12_9_3,
-	vp15_0_1 = alterarvp15_0_1,
-	vp15_0_2 = alterarvp15_0_2,
-	vp15_0_3 = alterarvp15_0_3,
-	vp17_6_1 = alterarvp17_6_1,
-	vp17_6_2 = alterarvp17_6_2,
-	vp17_6_3 = alterarvp17_6_3,
-	vp20_2_1 = alterarvp20_2_1,
-	vp20_2_2 = alterarvp20_2_2,
-	vp20_2_3 = alterarvp20_2_3,
-	vp22_8_1 = alterarvp22_8_1,
-	vp22_8_2 = alterarvp22_8_2,
-	vp22_8_3 = alterarvp22_8_3,
-	vp25_0_1 = alterarvp25_0_1,
-	vp25_0_2 = alterarvp25_0_2,
-	vp25_0_3 = alterarvp25_0_3
+    SET vp1 = alterarVp1,
+    vp1_1 = alterarVp1_1,
+    vp1_2 = alterarVp1_2,
+    vp1_3 = alterarVp1_3,
+    vp2 = alterarVp2,
+    vp2_1 = alterarVp2_1,
+    vp2_2 = alterarVp2_2,
+    vp2_3 = alterarVp2_3,
+    vp3 = alterarVp3,
+    vp3_1 = alterarVp3_1,
+    vp3_2 = alterarVp3_2,
+    vp3_3 = alterarVp3_3,
+    vp4 = alterarVp4,
+    vp4_1 = alterarVp4_1,
+    vp4_2 = alterarVp4_2,
+    vp4_3 = alterarVp4_3,
+    vp5 = alterarVp5,
+    vp5_1 = alterarVp5_1,
+    vp5_2 = alterarVp5_2,
+    vp5_3 = alterarVp5_3,
+    vp6 = alterarVp6,
+    vp6_1 = alterarVp6_1,
+    vp6_2 = alterarVp6_2,
+    vp6_3 = alterarVp6_3,
+    vp7 = alterarVp7,
+    vp7_1 = alterarVp7_1,
+    vp7_2 = alterarVp7_2,
+    vp7_3 = alterarVp7_3,
+    vp8 = alterarVp8,
+    vp8_1 = alterarVp8_1,
+    vp8_2 = alterarVp8_2,
+    vp8_3 = alterarVp8_3,
+    vp9 = alterarVp9,
+    vp9_1 = alterarVp9_1,
+    vp9_2 = alterarVp9_2,
+    vp9_3 = alterarVp9_3,
+    vp10 = alterarVp10,
+    vp10_1 = alterarVp10_1,
+    vp10_2 = alterarVp10_2,
+    vp10_3 = alterarVp10_3,
+    vp11 = alterarVp11,
+    vp11_1 = alterarVp11_1,
+    vp11_2 = alterarVp11_2,
+    vp11_3 = alterarVp11_3
     WHERE pk_idControle = idControle;
 END // 
 DELIMITER ;
-call modificarControleDimensional(1, 33, 32, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1);
+call modificarControleDimensional(2, 44, 43, 42, 41, 40, 39, 38, 37, 36, 35, 34, 33, 32, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1);
 
 
 -- inserção de resultados do micrômetro
@@ -1099,36 +1134,46 @@ drop procedure alterarParalelismoPaq;
 -- Inserção de medições externas
 DELIMITER //
 CREATE PROCEDURE inserirMedicoesExternas(
-    IN novo_vn0_0_1 DECIMAL(6,3),
-    IN novo_vn0_0_2 DECIMAL(6,3),
-    IN novo_vn0_0_3 DECIMAL(6,3),
-    IN novo_vn1_3_1 DECIMAL(6,3),
-    IN novo_vn1_3_2 DECIMAL(6,3),
-    IN novo_vn1_3_3 DECIMAL(6,3),
-    IN novo_vn1_4_1 DECIMAL(6,3),
-    IN novo_vn1_4_2 DECIMAL(6,3),
-    IN novo_vn1_4_3 DECIMAL(6,3),
-    IN novo_vn20_0_1 DECIMAL(6,3),
-    IN novo_vn20_0_2 DECIMAL(6,3),
-    IN novo_vn20_0_3 DECIMAL(6,3),
-    IN novo_vn50_0_1 DECIMAL(6,3),
-    IN novo_vn50_0_2 DECIMAL(6,3),
-    IN novo_vn50_0_3 DECIMAL(6,3),
-    IN novo_vn100_0_1 DECIMAL(6,3),
-    IN novo_vn100_0_2 DECIMAL(6,3),
-    IN novo_vn100_0_3 DECIMAL(6,3),
-    IN novo_vn150_0_1 DECIMAL(6,3),
-    IN novo_vn150_0_2 DECIMAL(6,3),
-    IN novo_vn150_0_3 DECIMAL(6,3),
-    IN novo_vnExtra1_1 DECIMAL(6,3),
-    IN novo_vnExtra1_2 DECIMAL(6,3),
-    IN novo_vnExtra1_3 DECIMAL(6,3),
-    IN novo_vnExtra2_1 DECIMAL(6,3),
-    IN novo_vnExtra2_2 DECIMAL(6,3),
-    IN novo_vnExtra2_3 DECIMAL(6,3),
-    IN novo_vnExtra3_1 DECIMAL(6,3),
-    IN novo_vnExtra3_2 DECIMAL(6,3),
-    IN novo_vnExtra3_3 DECIMAL(6,3)
+    IN novoVn1 decimal(6,3),
+    IN novoVn1_1 decimal(6,3),
+    IN novoVn1_2 decimal(6,3),
+    IN novoVn1_3 decimal(6,3),
+    IN novoVn2 decimal(6,3),
+    IN novoVn2_1 decimal(6,3),
+    IN novoVn2_2 decimal(6,3),
+    IN novoVn2_3 decimal(6,3),
+    IN novoVn3 decimal(6,3),
+    IN novoVn3_1 decimal(6,3),
+    IN novoVn3_2 decimal(6,3),
+    IN novoVn3_3 decimal(6,3),
+    IN novoVn4 decimal(6,3),
+    IN novoVn4_1 decimal(6,3),
+    IN novoVn4_2 decimal(6,3),
+    IN novoVn4_3 decimal(6,3),
+    IN novoVn5 decimal(6,3),
+    IN novoVn5_1 decimal(6,3),
+    IN novoVn5_2 decimal(6,3),
+    IN novoVn5_3 decimal(6,3),
+    IN novoVn6 decimal(6,3),
+    IN novoVn6_1 decimal(6,3),
+    IN novoVn6_2 decimal(6,3),
+    IN novoVn6_3 decimal(6,3),
+    IN novoVn7 decimal(6,3),
+    IN novoVn7_1 decimal(6,3),
+    IN novoVn7_2 decimal(6,3),
+    IN novoVn7_3 decimal(6,3),
+    IN novoVnExtra1 decimal(6,3),
+    IN novoVnExtra1_1 decimal(6,3),
+    IN novoVnExtra1_2 decimal(6,3),
+    IN novoVnExtra1_3 decimal(6,3),
+    IN novoVnExtra2 decimal(6,3),
+    IN novoVnExtra2_1 decimal(6,3),
+    IN novoVnExtra2_2 decimal(6,3),
+    IN novoVnExtra2_3 decimal(6,3),
+    IN novoVnExtra3 decimal(6,3),
+    IN novoVnExtra3_1 decimal(6,3),
+    IN novoVnExtra3_2 decimal(6,3),
+    IN novoVnExtra3_3 decimal(6,3)
 )
 BEGIN
     INSERT INTO medicoesExternas (vn0_0_1, vn0_0_2, vn0_0_3, vn1_3_1, vn1_3_2, vn1_3_3, vn1_4_1, vn1_4_2, vn1_4_3, vn20_0_1, vn20_0_2, vn20_0_3, vn50_0_1, vn50_0_2, vn50_0_3, vn100_0_1, vn100_0_2, vn100_0_3, vn150_0_1, vn150_0_2, vn150_0_3, vnExtra1_1, vnExtra1_2, vnExtra1_3, vnExtra2_1, vnExtra2_2, vnExtra2_3, vnExtra3_1, vnExtra3_2, vnExtra3_3)
