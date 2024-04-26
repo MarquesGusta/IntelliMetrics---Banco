@@ -12,7 +12,6 @@ END //
 DELIMITER ;
 call criarUsuario("Matheus Aguilar", "theuzinapalaum@gmail.com", "tecnico");
 call criarUsuario("Julia Paxeco", "xulinhagamerm@gmail.com", "gestor");
-select * from usuarios;
 
 
 -- redefinição de senha
@@ -91,7 +90,7 @@ BEGIN
     WHERE pk_idUsuario = idUsuario;
 END//
 DELIMITER ;
-call infosUsuario(1, @nome, @email, @cargo, @status);
+call infosUsuario(2, @nome, @email, @cargo, @status);
 SELECT @nome AS nomeUsuario, @email AS emailUsuario, @cargo AS cargoUsuario, @status AS statusUsuario;
 
 
@@ -111,7 +110,6 @@ BEGIN
 END // 
 DELIMITER ;
 call criarCliente("Market Industry", "Roberto Carlos", "robertao2000@gmail.com", "11970449723", "Rua Senador Feijó, 4501, Sé", 12345678904321);
-select * from clientes;
 
 
 -- alteração de cliente
@@ -213,8 +211,6 @@ END //
 DELIMITER ;
 call criarOrdens(556, 1, 1, "Arregaça ai esse paquímetro", "calibracao", "Paquímetro ta com defeito", curdate(), '2024-03-27', "Bill Gates", "gatesbill@gmail.com", 11902345567, "em espera");
 call criarOrdens(665, 1, 1, "Arregaça ai esse parafuso", "medicao", "Parafuso torto", curdate(), '2024-04-28', "Bill Gates", "gatesbill@gmail.com", 11902345567, "em espera");
-select * from ordensServico;
-drop procedure criarOrdens;
 
 
 -- alteração de ordem de serviço
@@ -248,7 +244,6 @@ BEGIN
 END // 
 DELIMITER ;
 call modificarOrdem(45, 556, 1, 2, "banana", "calibracao", "cabou banana", '2024-04-27', "Bill Gates", "gatesbill@gmail.com", 11902345567);
-select * from ordensServico;
 
 
 -- marcar ordem de serviço como concluída
@@ -262,7 +257,7 @@ BEGIN
     WHERE pk_idOs = idOrdem;
 END // 
 DELIMITER ;
-call concluirOrdem(45);
+call concluirOrdem(556);
 
 
 -- desmarcar ordem de serviço como concluída
@@ -303,7 +298,7 @@ BEGIN
     WHERE pk_idOs = idOs;
 END//
 DELIMITER ;
-CALL infosOrdens(665, @idOs, @fk_idCliente, @fk_idUsuario, @titulo, @tipo, @descricao, @dataInicio, @dataTermino, @contratante, @email, @telefone, @status);
+CALL infosOrdens(556, @idOs, @fk_idCliente, @fk_idUsuario, @titulo, @tipo, @descricao, @dataInicio, @dataTermino, @contratante, @email, @telefone, @status);
 SELECT @idOs AS idOsResultado, @fk_idCliente AS fk_idClienteOs, @fk_idUsuario AS fk_idUsuarioOs, @titulo AS tituloOs, @tipo AS tipoOs, @descricao AS descricaoOs, @dataInicio AS dataInicioOs, @dataTermino AS dataTerminoOs, @contratante AS contratanteOs, @email AS emailOs, @telefone AS telefoneOs, @status AS statusOs;
 
 
@@ -328,9 +323,10 @@ CREATE PROCEDURE modificarCategoria(
 BEGIN
 	UPDATE categorias
     SET nome = alterarCategoria
-    WHERE pk_idCategoria = alterarCategoria;
+    WHERE pk_idCategoria = idCategoria;
 END//
 DELIMITER ;
+call modificarCategoria(1, "Paquimero");
 
 
 -- cadastro de instrumentos
@@ -355,7 +351,6 @@ BEGIN
 END //
 DELIMITER ;
 call cadastrarInstrumento(1, 556, 1, "Paquímetro universal", 112233, 1222333,  "Martelos e machados", "75-100", "mm", 2.43, "mm", "Martelos wakanda");
-select * from instrumentos;
 
 
 -- alteraçao de instrumentos
@@ -420,7 +415,6 @@ END//
 DELIMITER ;
 CALL infosInstrumento(1, @fk_idCliente, @fk_idOs, @fk_idCategoria, @nome, @nSerie, @identificacaoCliente, @fabricante, @faixaNominalNum, @faixaNominalUni, @divisaoResolucaoNum, @divisaoResolucaoUni, @orgaoResponsavel);
 SELECT @fk_idCliente AS fk_idCliente, @fk_idOs AS fk_idOs, @fk_idCategoria AS Categoria, @nome AS Instruemnto, @nSerie AS nSerie, @identificacaoCliente AS identificacaoCliente, @fabricante AS fabricante, @faixaNominalNum AS faixaNominalNum, @faixaNominalUni AS faixaNominalUni, @divisaoResolucaoNum AS divisaoResolucaoNum, @divisaoResolucaoUni AS divisaoResolucaoUni, @orgaoResponsavel AS orgaoResponsavel;
-drop procedure infosInstrumento;
 
 
 -- inserção de recebidos
@@ -447,8 +441,6 @@ END //
 DELIMITER ;
 call inserirRecebimento(556, 1, "rh", 12341, 12344563, '2024-03-27', "sim", null, null, "sim", '2024-03-28', null, null);
 call inserirRecebimento(665, 2, "financeiro", 33452, 00097612, '2024-03-27', "sim", null, null, "sim", '2024-08-28', null, null);
-select * from recebidos;
-drop procedure recebimento;
 
 
 -- alteração de recebidos
@@ -485,12 +477,10 @@ BEGIN
     WHERE pk_idRecebimento = idRecebimento;
 END // 
 DELIMITER ;
-call modificarRecebimento(2, 556, "vendas", 12341, 12344563, '2024-03-27', "sim", '2024-04-25', '2024-05-21', "sim", '2024-03-28', null, null);
-drop procedure modificarRecebimento;
+call modificarRecebimento(1, 556, "vendas", 12341, 12344563, '2024-03-27', "sim", '2024-04-25', '2024-05-21', "sim", '2024-03-28', null, null);
 
 
 -- visualização dos recebidos
-drop procedure infosRecebidos;
 DELIMITER //
 CREATE PROCEDURE infosRecebidos(
 	IN idOrdem int,
@@ -509,7 +499,7 @@ BEGIN
     WHERE os.pk_idOs = idOrdem;
 END // 
 DELIMITER ;
-CALL infosRecebidos(665, @infoTipo, @infoContratante, @infoEmail, @infoTelefone, @infoCliente);
+CALL infosRecebidos(556, @infoTipo, @infoContratante, @infoEmail, @infoTelefone, @infoCliente);
 SELECT @infoTipo AS infoTipo, @infoContratante AS contratante, @infoEmail AS email, @infoTelefone AS telefone, @infoCliente AS Cliente;
 
 
@@ -529,7 +519,6 @@ BEGIN
 END // 
 DELIMITER ;
 call criarPlaneza(891.222, 892.322, 893.422, 894.522, 895.622, 896.722);
-select * from planeza;
 
 
 -- alteração de planeza
@@ -576,7 +565,6 @@ BEGIN
 END // 
 DELIMITER ;
 call criarParalelismoMicro(1.2, 2.3, 3.4, 4.5, 5.6, 6.7, 7.8, 8.9, 9.0);
-select * from paralelismoMicro;
 
 
 -- alteração de paralelismo do micrômetro
@@ -664,7 +652,6 @@ BEGIN
 END // 
 DELIMITER ;
 call criarControleDimensional(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 , 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44);
-select * from controleDimensional;
 
 
 -- alteração de controle dimensional
@@ -765,7 +752,7 @@ BEGIN
     WHERE pk_idControle = idControle;
 END // 
 DELIMITER ;
-call modificarControleDimensional(2, 44, 43, 42, 41, 40, 39, 38, 37, 36, 35, 34, 33, 32, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1);
+call modificarControleDimensional(1, 44, 43, 42, 41, 40, 39, 38, 37, 36, 35, 34, 33, 32, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1);
 
 
 -- inserção de resultados do micrômetro
@@ -778,7 +765,7 @@ CREATE PROCEDURE criarResultadosMicrometros(
     IN idInstrumento int,
     IN novoTecnico varchar(60),
     IN novoResponsável varchar(60),
-    IN novaFaixaCalibradaNum decimal(4,2),
+    IN novaFaixaCalibradaNum enum("0-25", "25-50", "50-75", "75-100", "100-125", "125-150", "150-175", "175-200", "1-25"),
     IN novaFaixaCalibradaUni enum("mm", "pol"),
     IN novaDataCalibracao date,
     IN novaInspecao enum("ok", "nok"),
@@ -792,8 +779,7 @@ BEGIN
     VALUES (nrCertificado, idControle, idPlaneza, idParalelismoMicro, idInstrumento, novoTecnico, novoResponsável, novaFaixaCalibradaNum, novaFaixaCalibradaUni, novaDataCalibracao, novaInspecao, novoTipoEscala, novaVersaoMetodo,novoTempInicial, novoTempFinal);
 END // 
 DELIMITER ;
-call criarResultadosMicrometros(745, 1, 1, 1, 1, 1, 2, 2.3, "mm", '2024-03-21', "ok", "analogico", 9, 20.70, 20.5);
-select * from resultadosMicrometros;
+call criarResultadosMicrometros(745, 1, 1, 1, 1, 1, 2, "100-125", "mm", '2024-03-21', "ok", "analogico", 9, 20.70, 20.5);
 
 
 -- alteração de resultados do micrômetro
@@ -807,7 +793,7 @@ CREATE PROCEDURE modificarResultadosMicrometros(
     IN idInstrumento int,
     IN alterarTecnico varchar(60),
     IN alterarResponsável varchar(60),
-    IN alterarFaixaCalibradaNum decimal(4,2),
+    IN alterarFaixaCalibradaNum enum("0-25", "25-50", "50-75", "75-100", "100-125", "125-150", "150-175", "175-200", "1-25"),
     IN alterarFaixaCalibradaUni enum("mm", "pol"),
     IN alterarDataCalibracao date,
     IN alterarInspecao enum("ok", "nok"),
@@ -836,11 +822,10 @@ BEGIN
     WHERE pk_idNrCertificado = antigoNrCertificado;
 END // 
 DELIMITER ;
-call modificarResultadosMicrometros(745, 750, 1, 1, 1, 1, 1, 2, 3.2, "pol", '2024-03-21', "ok", "analogico", 9, 20.70, 20.5);
+call modificarResultadosMicrometros(745, 750, 1, 1, 1, 1, 1, 2, "125-150", "pol", '2024-03-21', "ok", "analogico", 9, 20.70, 20.5);
 
 
 -- visualizar informações do certificado
-drop procedure infoscertificado;
 DELIMITER //
 CREATE PROCEDURE infoscertificado(
 	IN idInstrumento int,
@@ -851,7 +836,7 @@ CREATE PROCEDURE infoscertificado(
     OUT infoFabricante varchar(60),
     OUT infoNSerie int,
     OUT infoIdentificacaoCliente varchar(50),
-    OUT infoFaixaNominalNum decimal(4,2),
+    OUT infoFaixaNominalNum enum("0-25", "25-50", "50-75", "75-100", "100-125", "125-150", "150-175", "175-200", "1-25"),
 	OUT infoFaixaNominalUni enum("mm", "pol"),
 	OUT infoDivisaoResolucaoNum decimal(4,2),
 	OUT infoDivisaoResolucaoUni enum("mm", "pol"),
@@ -900,7 +885,6 @@ BEGIN
 END // 
 DELIMITER ;
 call criarMedicaoInterna(1.2, 2.3, 3.4, 4.5, 5.6, 6.7, 7.8, 8.9, 9.0, 1.1, 2.2, 3.3);
-select * from medicoesInternas; 
 
 
 -- alteração de mdeições internas
@@ -962,7 +946,6 @@ BEGIN
 END //
 DELIMITER ;
 CALL inserirMedicoesRessaltos(10.5, 10.2, 10.3, 10.4, 20.5, 20.2, 20.3, 20.4, 30.5, 30.2, 30.3, 30.4);
-select * from medicoesRessaltos;
 
 
 -- alteração de medições de ressaltos
@@ -1001,6 +984,7 @@ END //
 DELIMITER ;
 CALL alterarMedicoesRessaltos(1, 5.1, 10.2, 10.3, 10.4, 20.5, 20.2, 20.3, 20.4, 30.5, 30.2, 30.3, 30.4);
 
+
 -- Inserção de medições de profundidades
 DELIMITER //
 CREATE PROCEDURE inserirMedicaoProfundidade(
@@ -1023,7 +1007,6 @@ BEGIN
 END//
 DELIMITER ;
 CALL inserirMedicaoProfundidade(1.5, 1.6, 1.7, 1.8, 2.5, 2.6, 2.7, 2.8, 3.5, 3.6, 3.7, 3.8);
-select * from medicoesProfundidades;
 
 
 -- Alteração de medições de profundidades
@@ -1087,7 +1070,6 @@ BEGIN
 END//
 DELIMITER ;
 CALL inserirParalelismoPaq(1.5, 1.6, 1.7, 1.8, 2.5, 2.6, 2.7, 2.8, 2.9, 9.9, 1.2, 2.2, 3.6, 7.4);
-select * from paralelismoPaq;
 
 
 -- Alteração de paralelismo do paq
@@ -1129,12 +1111,12 @@ BEGIN
 END//
 DELIMITER ;
 CALL alterarParalelismoPaq(1, 5.1, 1.6, 1.7, 1.8, 2.5, 2.6, 2.7, 2.8, 2.9, 9.9, 1.2, 2.2, 3.6, 7.4);
-drop procedure alterarParalelismoPaq;
+
 
 -- Inserção de medições externas
 DELIMITER //
 CREATE PROCEDURE inserirMedicoesExternas(
-    IN novoVn1 decimal(6,3),
+	IN novoVn1 decimal(6,3),
     IN novoVn1_1 decimal(6,3),
     IN novoVn1_2 decimal(6,3),
     IN novoVn1_3 decimal(6,3),
@@ -1176,85 +1158,104 @@ CREATE PROCEDURE inserirMedicoesExternas(
     IN novoVnExtra3_3 decimal(6,3)
 )
 BEGIN
-    INSERT INTO medicoesExternas (vn0_0_1, vn0_0_2, vn0_0_3, vn1_3_1, vn1_3_2, vn1_3_3, vn1_4_1, vn1_4_2, vn1_4_3, vn20_0_1, vn20_0_2, vn20_0_3, vn50_0_1, vn50_0_2, vn50_0_3, vn100_0_1, vn100_0_2, vn100_0_3, vn150_0_1, vn150_0_2, vn150_0_3, vnExtra1_1, vnExtra1_2, vnExtra1_3, vnExtra2_1, vnExtra2_2, vnExtra2_3, vnExtra3_1, vnExtra3_2, vnExtra3_3)
-    VALUES (novo_vn0_0_1, novo_vn0_0_2, novo_vn0_0_3, novo_vn1_3_1, novo_vn1_3_2, novo_vn1_3_3, novo_vn1_4_1, novo_vn1_4_2, novo_vn1_4_3, novo_vn20_0_1, novo_vn20_0_2, novo_vn20_0_3, novo_vn50_0_1, novo_vn50_0_2, novo_vn50_0_3, novo_vn100_0_1, novo_vn100_0_2, novo_vn100_0_3, novo_vn150_0_1, novo_vn150_0_2, novo_vn150_0_3, novo_vnExtra1_1, novo_vnExtra1_2, novo_vnExtra1_3, novo_vnExtra2_1, novo_vnExtra2_2, novo_vnExtra2_3, novo_vnExtra3_1, novo_vnExtra3_2, novo_vnExtra3_3);
+    INSERT INTO medicoesExternas (vn1, vn1_1, vn1_2, vn1_3, vn2, vn2_1, vn2_2, vn2_3, vn3, vn3_1, vn3_2, vn3_3, vn4, vn4_1, vn4_2, vn4_3, vn5, vn5_1, vn5_2, vn5_3, vn6, vn6_1, vn6_2, vn6_3, vn7, vn7_1, vn7_2, vn7_3, vnExtra1, vnExtra1_1, vnExtra1_2, vnExtra1_3, vnExtra2, vnExtra2_1, vnExtra2_2, vnExtra2_3, vnExtra3, vnExtra3_1, vnExtra3_2, vnExtra3_3)
+    VALUES (novoVn1, novoVn1_1, novoVn1_2, novoVn1_3, novoVn2, novoVn2_1, novoVn2_2, novoVn2_3, novoVn3, novoVn3_1, novoVn3_2, novoVn3_3, novoVn4, novoVn4_1, novoVn4_2, novoVn4_3, novoVn5, novoVn5_1, novoVn5_2, novoVn5_3, novoVn6, novoVn6_1, novoVn6_2, novoVn6_3, novoVn7, novoVn7_1, novoVn7_2, novoVn7_3, novoVnExtra1, novoVnExtra1_1, novoVnExtra1_2, novoVnExtra1_3, novoVnExtra2, novoVnExtra2_1, novoVnExtra2_2, novoVnExtra2_3, novoVnExtra3, novoVnExtra3_1, novoVnExtra3_2, novoVnExtra3_3);
 END//
 DELIMITER ;
-CALL inserirMedicoesExternas(0.1, 0.2, 0.3, 1.3, 1.4, 1.5, 1.4, 1.5, 1.6, 20.0, 20.1, 20.2, 50.0, 50.1, 50.2, 100.0, 100.1, 100.2, 150.0, 150.1, 150.2, 10.0, 10.1, 10.2, 20.0, 20.1, 20.2, 30.0, 30.1, 30.2);
-select * from medicoesExternas;
+CALL inserirMedicoesExternas(1, 0.1, 0.2, 0.3, 2, 1.3, 1.4, 1.5, 3, 1.4, 1.5, 1.6, 4, 20.0, 20.1, 20.2, 5, 50.0, 50.1, 50.2, 6, 100.0, 100.1, 100.2, 7, 150.0, 150.1, 150.2, 8, 10.0, 10.1, 10.2, 9, 20.0, 20.1, 20.2, 10, 30.0, 30.1, 30.2);
 
 
 -- Alteração de medições externas
 DELIMITER //
 CREATE PROCEDURE alterarMedicoesExternas(
-    IN idMedicaoExterna INT,
-    IN novo_vn0_0_1 DECIMAL(6,3),
-    IN novo_vn0_0_2 DECIMAL(6,3),
-    IN novo_vn0_0_3 DECIMAL(6,3),
-    IN novo_vn1_3_1 DECIMAL(6,3),
-    IN novo_vn1_3_2 DECIMAL(6,3),
-    IN novo_vn1_3_3 DECIMAL(6,3),
-    IN novo_vn1_4_1 DECIMAL(6,3),
-    IN novo_vn1_4_2 DECIMAL(6,3),
-    IN novo_vn1_4_3 DECIMAL(6,3),
-    IN novo_vn20_0_1 DECIMAL(6,3),
-    IN novo_vn20_0_2 DECIMAL(6,3),
-    IN novo_vn20_0_3 DECIMAL(6,3),
-    IN novo_vn50_0_1 DECIMAL(6,3),
-    IN novo_vn50_0_2 DECIMAL(6,3),
-    IN novo_vn50_0_3 DECIMAL(6,3),
-    IN novo_vn100_0_1 DECIMAL(6,3),
-    IN novo_vn100_0_2 DECIMAL(6,3),
-    IN novo_vn100_0_3 DECIMAL(6,3),
-    IN novo_vn150_0_1 DECIMAL(6,3),
-    IN novo_vn150_0_2 DECIMAL(6,3),
-    IN novo_vn150_0_3 DECIMAL(6,3),
-    IN novo_vnExtra1_1 DECIMAL(6,3),
-    IN novo_vnExtra1_2 DECIMAL(6,3),
-    IN novo_vnExtra1_3 DECIMAL(6,3),
-    IN novo_vnExtra2_1 DECIMAL(6,3),
-    IN novo_vnExtra2_2 DECIMAL(6,3),
-    IN novo_vnExtra2_3 DECIMAL(6,3),
-    IN novo_vnExtra3_1 DECIMAL(6,3),
-    IN novo_vnExtra3_2 DECIMAL(6,3),
-    IN novo_vnExtra3_3 DECIMAL(6,3)
+	IN idMedicaoExterna int,
+	IN alterarVn1 decimal(6,3),
+    IN alterarVn1_1 decimal(6,3),
+    IN alterarVn1_2 decimal(6,3),
+    IN alterarVn1_3 decimal(6,3),
+    IN alterarVn2 decimal(6,3),
+    IN alterarVn2_1 decimal(6,3),
+    IN alterarVn2_2 decimal(6,3),
+    IN alterarVn2_3 decimal(6,3),
+    IN alterarVn3 decimal(6,3),
+    IN alterarVn3_1 decimal(6,3),
+    IN alterarVn3_2 decimal(6,3),
+    IN alterarVn3_3 decimal(6,3),
+    IN alterarVn4 decimal(6,3),
+    IN alterarVn4_1 decimal(6,3),
+    IN alterarVn4_2 decimal(6,3),
+    IN alterarVn4_3 decimal(6,3),
+    IN alterarVn5 decimal(6,3),
+    IN alterarVn5_1 decimal(6,3),
+    IN alterarVn5_2 decimal(6,3),
+    IN alterarVn5_3 decimal(6,3),
+    IN alterarVn6 decimal(6,3),
+    IN alterarVn6_1 decimal(6,3),
+    IN alterarVn6_2 decimal(6,3),
+    IN alterarVn6_3 decimal(6,3),
+    IN alterarVn7 decimal(6,3),
+    IN alterarVn7_1 decimal(6,3),
+    IN alterarVn7_2 decimal(6,3),
+    IN alterarVn7_3 decimal(6,3),
+    IN alterarVnExtra1 decimal(6,3),
+    IN alterarVnExtra1_1 decimal(6,3),
+    IN alterarVnExtra1_2 decimal(6,3),
+    IN alterarVnExtra1_3 decimal(6,3),
+    IN alterarVnExtra2 decimal(6,3),
+    IN alterarVnExtra2_1 decimal(6,3),
+    IN alterarVnExtra2_2 decimal(6,3),
+    IN alterarVnExtra2_3 decimal(6,3),
+    IN alterarVnExtra3 decimal(6,3),
+    IN alterarVnExtra3_1 decimal(6,3),
+    IN alterarVnExtra3_2 decimal(6,3),
+    IN alterarVnExtra3_3 decimal(6,3)
 )
 BEGIN
     UPDATE medicoesExternas
-    SET vn0_0_1 = novo_vn0_0_1,
-        vn0_0_2 = novo_vn0_0_2,
-        vn0_0_3 = novo_vn0_0_3,
-        vn1_3_1 = novo_vn1_3_1,
-        vn1_3_2 = novo_vn1_3_2,
-        vn1_3_3 = novo_vn1_3_3,
-        vn1_4_1 = novo_vn1_4_1,
-        vn1_4_2 = novo_vn1_4_2,
-        vn1_4_3 = novo_vn1_4_3,
-        vn20_0_1 = novo_vn20_0_1,
-        vn20_0_2 = novo_vn20_0_2,
-        vn20_0_3 = novo_vn20_0_3,
-        vn50_0_1 = novo_vn50_0_1,
-        vn50_0_2 = novo_vn50_0_2,
-        vn50_0_3 = novo_vn50_0_3,
-        vn100_0_1 = novo_vn100_0_1,
-        vn100_0_2 = novo_vn100_0_2,
-        vn100_0_3 = novo_vn100_0_3,
-        vn150_0_1 = novo_vn150_0_1,
-        vn150_0_2 = novo_vn150_0_2,
-        vn150_0_3 = novo_vn150_0_3,
-        vnExtra1_1 = novo_vnExtra1_1,
-        vnExtra1_2 = novo_vnExtra1_2,
-        vnExtra1_3 = novo_vnExtra1_3,
-        vnExtra2_1 = novo_vnExtra2_1,
-        vnExtra2_2 = novo_vnExtra2_2,
-        vnExtra2_3 = novo_vnExtra2_3,
-        vnExtra3_1 = novo_vnExtra3_1,
-        vnExtra3_2 = novo_vnExtra3_2,
-        vnExtra3_3 = novo_vnExtra3_3
+    SET vn1 = alterarVn1,
+    vn1_1 = alterarVn1_1,
+    vn1_2 = alterarVn1_2,
+    vn1_3 = alterarVn1_3,
+    vn2 = alterarVn2,
+    vn2_1 = alterarVn2_1,
+    vn2_2 = alterarVn2_2,
+    vn2_3 = alterarVn2_3,
+    vn3 = alterarVn3,
+    vn3_1 = alterarVn3_1,
+    vn3_2 = alterarVn3_2,
+    vn3_3 = alterarVn3_3,
+    vn4 = alterarVn4,
+    vn4_1 = alterarVn4_1,
+    vn4_2 = alterarVn4_2,
+    vn4_3 = alterarVn4_3,
+    vn5 = alterarVn5,
+    vn5_1 = alterarVn5_1,
+    vn5_2 = alterarVn5_2,
+    vn5_3 = alterarVn5_3,
+    vn6 = alterarVn6,
+    vn6_1 = alterarVn6_1,
+    vn6_2 = alterarVn6_2,
+    vn6_3 = alterarVn6_3,
+    vn7 = alterarVn7,
+    vn7_1 = alterarVn7_1,
+    vn7_2 = alterarVn7_2,
+    vn7_3 = alterarVn7_3,
+    vn1 = alterarVnExtra1,
+    vn1_1 = alterarVnExtra1_1,
+    vn1_2 = alterarVnExtra1_2,
+    vn1_3 = alterarVnExtra1_3,
+    vn2 = alterarVnExtra2,
+    vn2_1 = alterarVnExtra2_1,
+    vn2_2 = alterarVnExtra2_2,
+    vn2_3 = alterarVnExtra2_3,
+    vn3 = alterarVnExtra3,
+    vn3_1 = alterarVnExtra3_1,
+    vn3_2 = alterarVnExtra3_2,
+    vn3_3 = alterarVnExtra3_3
     WHERE pk_idMedicaoExterna = idMedicaoExterna;
 END//
 DELIMITER ;
-CALL alterarMedicoesExternas(1, 0.1, 0.2, 0.3, 1.3, 1.4, 1.5, 1.4, 1.5, 1.6, 20.0, 20.1, 20.2, 50.0, 50.1, 50.2, 100.0, 100.1, 100.2, 150.0, 150.1, 150.2, 10.0, 10.1, 10.2, 20.0, 20.1, 20.2, 30.0, 30.1, 30.2);
+CALL alterarMedicoesExternas(1, 1, 0.1, 0.2, 0.3, 2, 1.3, 1.4, 1.5, 3, 1.4, 1.5, 1.6, 4, 20.0, 20.1, 20.2, 5, 50.0, 50.1, 50.2, 6, 100.0, 100.1, 100.2, 7, 150.0, 150.1, 150.2, 8, 10.0, 10.1, 10.2, 9, 20.0, 20.1, 20.2, 10, 30.0, 30.1, 30.2);
 
 
 -- inserção de resultados dos paquímetros 
@@ -1282,8 +1283,6 @@ BEGIN
 END // 
 DELIMITER ;
 call criarResultadosPaquimetro(322, 1, 1, 1, 1, 1, 1, 1, 2, '2024-03-25', "ok", "digital", 9, 22.5, 22);
-select * from resultadosPaquimetros;
-drop procedure criarResultadosPaquimetro;
 
 
 -- alteração de resultados dos paquímetros
@@ -1346,8 +1345,6 @@ END //
 DELIMITER ;
 call cadastrarPeca(665, 1, 'Paraconfuso', 'Ferro', 12345, 'Parafuso ta torto para a esquerda, naquele pique');
 call cadastrarPeca(665, 1, 'Prego macaco', 'Aço inox', 54321, 'Prego macaco não ta perfurando a madeira direito');
-select * from pecas;
-DROP PROCEDURE cadastrarPeca;
 
 
 -- alteraçao de peças
@@ -1373,7 +1370,6 @@ BEGIN
 END //
 DELIMITER ;
 call alterarPeca(1, 665, 1, 'Parafuso', 'Metal', 12345, 'Parafuso ta torto');
-drop procedure alterarPeca;
 
 
 -- visualização das peças
@@ -1394,7 +1390,7 @@ BEGIN
     WHERE pk_idPeca = idPeca;
 END //
 DELIMITER ;
-call infosPeca(2, @idOrdem, @idCliente, @infoNome, @infoMaterial, @infonDesenho, @infoDescricao);
+call infosPeca(1, @idOrdem, @idCliente, @infoNome, @infoMaterial, @infonDesenho, @infoDescricao);
 SELECT @idOrdem AS OrdemDeServiço, @idCliente AS Cliente, @infoNome AS Peça, @infoMaterial AS Material, @infonDesenho AS NumDesenho, @infoDescricao AS Descrição;
 
 
@@ -1421,8 +1417,6 @@ BEGIN
 END //
 DELIMITER ;
 call criarRelatorio(22, 1, 1, 1, '09:00', '17:00', '26:00', '25°C', '50%', 'Nenhuma observação', 'Laboratório A', '2024-03-24', 'Assinatura do técnico');
-select * from relatorio;
-drop procedure criarRelatorio;
 
 
 -- alteração de relatório
@@ -1461,11 +1455,9 @@ BEGIN
     WHERE pk_idRelatorio = antigoIdRelatorio;
 END // 
 DELIMITER ;
-call modificarRelatorio(23, 32, 1, 1, 1, '10:00', '18:00', '8:00', '25°C', '50%', 'Nenhuma observação', 'Laboratório A', '2024-03-24', 'Assinatura do técnico');
+call modificarRelatorio(22, 32, 1, 1, 1, '10:00', '18:00', '8:00', '25°C', '50%', 'Nenhuma observação', 'Laboratório A', '2024-03-24', 'Assinatura do técnico');
 
-
--- retornar relatório
-drop procedure infosRelatorio;
+-- retornar informações do relatório
 DELIMITER //
 CREATE PROCEDURE infosRelatorio(
 	IN idPeca int,
@@ -1488,58 +1480,3 @@ END //
 DELIMITER ;
 call infosRelatorio(1, @infoUsuario, @infoPeca, @infoMaterial, @infoNDesenho, @infoDescricao);
 SELECT @infoUsuario AS Usuario, @infoPeca AS Peça, @infoMaterial AS Material, @infoNDesenho AS NumDesenho, @infoDescricao AS Descricao;
-
-
--- Abaixo estão alguns triggers para melhorar a funcionamento do banco de dados
-
--- precisamos criar um trigger para alterar o número do certificado caso eles alterem algum valor da calibração
-
--- também precisamos criar um trigger para caso eles alterem o id de uma ordem de serviço, também altere as fks que estão referenciando essa ordem
-
--- Trigger para alterar a fk de recebidos
-DELIMITER //
-CREATE TRIGGER atualizarFkRecebidos
-AFTER UPDATE ON ordensServico
-FOR EACH ROW
-BEGIN
-    IF OLD.pk_idOs <> NEW.pk_idOs THEN
-        UPDATE recebidos
-        SET fk_idOs = NEW.pk_idOs
-        WHERE fk_idOs = OLD.pk_idOs;
-    END IF;
-END;
-//
-DELIMITER ;
-DROP TRIGGER IF EXISTS atualizarFkRecebidos;
-
--- Trigger para alterar a fk de instrumentos
-DELIMITER //
-CREATE TRIGGER atualizarFkInstrumentos
-AFTER UPDATE ON ordensServico
-FOR EACH ROW
-BEGIN
-    IF OLD.pk_idOs <> NEW.pk_idOs THEN
-        UPDATE instrumentos
-        SET fk_idOs = NEW.pk_idOs
-        WHERE fk_idOs = OLD.pk_idOs;
-    END IF;
-END;
-//
-DELIMITER ;
-DROP TRIGGER IF EXISTS atualizarFkInstrumentos;
-
--- Trigger para alterar a fk de peças
-DELIMITER //
-CREATE TRIGGER atualizarFkPecas
-AFTER UPDATE ON ordensServico
-FOR EACH ROW
-BEGIN
-    IF OLD.pk_idOs <> NEW.pk_idOs THEN
-        UPDATE pecas
-        SET fk_idOs = NEW.pk_idOs
-        WHERE fk_idOs = OLD.pk_idOs;
-    END IF;
-END;
-//
-DELIMITER ;
-DROP TRIGGER IF EXISTS atualizarFkPecas;
