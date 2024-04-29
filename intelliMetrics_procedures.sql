@@ -557,11 +557,12 @@ CREATE PROCEDURE criarParalelismoMicro(
     IN novocMovelcFixo2 decimal(6,3),
     IN novocMovelcFixo3 decimal(6,3),
     IN novocMovelcFixo4 decimal(6,3),
-    IN novocMovelcFixo5 decimal(6,3)
+    IN novocMovelcFixo5 decimal(6,3),
+	IN novocMovelcFixo6 decimal(6,3)
 )
 BEGIN
-	INSERT INTO paralelismoMicro(valorNominal1, valorNominal2, valorNominal3, valorNominal4, cMovelcFixo1, cMovelcFixo2, cMovelcFixo3, cMovelcFixo4, cMovelcFixo5)
-    VALUES (novovalorNominal1, novovalorNominal2, novovalorNominal3, novovalorNominal4, novocMovelcFixo1, novocMovelcFixo2, novocMovelcFixo3, novocMovelcFixo4, novocMovelcFixo5);
+	INSERT INTO paralelismoMicro(valorNominal1, valorNominal2, valorNominal3, valorNominal4, cMovelcFixo1, cMovelcFixo2, cMovelcFixo3, cMovelcFixo4, cMovelcFixo5, cMovelcFixo6)
+    VALUES (novovalorNominal1, novovalorNominal2, novovalorNominal3, novovalorNominal4, novocMovelcFixo1, novocMovelcFixo2, novocMovelcFixo3, novocMovelcFixo4, novocMovelcFixo5, novocMovelcFixo6);
 END // 
 DELIMITER ;
 call criarParalelismoMicro(1.2, 2.3, 3.4, 4.5, 5.6, 6.7, 7.8, 8.9, 9.0);
@@ -579,7 +580,8 @@ CREATE PROCEDURE modificarParalelismoMicro(
     IN novocMovelcFixo2 decimal(6,3),
     IN novocMovelcFixo3 decimal(6,3),
     IN novocMovelcFixo4 decimal(6,3),
-    IN novocMovelcFixo5 decimal(6,3)
+    IN novocMovelcFixo5 decimal(6,3),
+	IN novocMovelcFixo6 decimal(6,3)
 )
 BEGIN
 	UPDATE paralelismoMicro
@@ -591,7 +593,8 @@ BEGIN
     cMovelcFixo2 = novocMovelcFixo2,
     cMovelcFixo3 = novocMovelcFixo3,
     cMovelcFixo4 = novocMovelcFixo4,
-    cMovelcFixo5 = novocMovelcFixo5
+    cMovelcFixo5 = novocMovelcFixo5,
+	cMovelcFixo6 = novocMovelcFixo6
     WHERE pk_idParalelismoMicro = idParalelismo;
 END // 
 DELIMITER ;
