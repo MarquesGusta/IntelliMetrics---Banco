@@ -107,7 +107,8 @@ CREATE TABLE paralelismoMicro(
     cMovelcFixo2 decimal(6,3) NOT NULL,
     cMovelcFixo3 decimal(6,3) NOT NULL,
     cMovelcFixo4 decimal(6,3) NOT NULL,
-    cMovelcFixo5 decimal(6,3) NOT NULL
+    cMovelcFixo5 decimal(6,3) NOT NULL,
+	cMovelFixo6 decimal(6,3) NOT NULL
 );
 
 CREATE TABLE controleDimensional(
