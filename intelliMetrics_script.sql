@@ -81,6 +81,7 @@ CREATE TABLE instrumentos(
     divisaoResolucaoNum decimal(4,2) NOT NULL,
     divisaoResolucaoUni enum("mm", "pol") NOT NULL,
     orgaoResponsavel varchar(60),
+	estadoEmbalagem enum("ruim", "medio", "bom") NOT NULL,
     
     FOREIGN KEY(fk_idCliente) REFERENCES clientes(pk_idCliente),
     FOREIGN KEY(fk_idOs) REFERENCES ordensServico(pk_idOs),
@@ -329,6 +330,8 @@ CREATE TABLE pecas(
     material varchar(60) NOT NULL,
     nDesenho int NOT NULL,
     descricao varchar(300),
+	estadoEmbalagem enum("ruim", "medio", "bom") NOT NULL,
+	
     
     FOREIGN KEY (fk_idOs) REFERENCES ordensServico(pk_idOs),
     FOREIGN KEY(fk_idCliente) REFERENCES clientes(pk_idCliente)
