@@ -343,14 +343,15 @@ CREATE PROCEDURE cadastrarInstrumento(
     IN novaFaixaNominalUnidade enum('mm', 'pol'),
     IN novaDivisaoNum decimal(4,2),
     IN novaDivisaoUni enum('mm', 'pol'),
-    IN novoOrgao varchar(60)
+    IN novoOrgao varchar(60),
+	IN novaEmbalagem enum("ruim", "medio", "bom")
 )
 BEGIN
-    INSERT INTO instrumentos(fk_idCliente, fk_idOs, fk_idCategoria, nome, nSerie, identificacaoCliente, fabricante, faixaNominalNum, faixaNominalUni, divisaoResolucaoNum, divisaoResolucaoUni, orgaoResponsavel)
-    VALUES (idCliente, idOrdem, idCategoria, novoNome, novoNSerie, novaIdentificacaoCliente, novoFabricante, novaFaixaNominalNum, novaFaixaNominalUnidade, novaDivisaoNum, novaDivisaoUni, novoOrgao);
+    INSERT INTO instrumentos(fk_idCliente, fk_idOs, fk_idCategoria, nome, nSerie, identificacaoCliente, fabricante, faixaNominalNum, faixaNominalUni, divisaoResolucaoNum, divisaoResolucaoUni, orgaoResponsavel, estadoEmbalagem)
+    VALUES (idCliente, idOrdem, idCategoria, novoNome, novoNSerie, novaIdentificacaoCliente, novoFabricante, novaFaixaNominalNum, novaFaixaNominalUnidade, novaDivisaoNum, novaDivisaoUni, novoOrgao, novaEmbalagem);
 END //
 DELIMITER ;
-call cadastrarInstrumento(1, 556, 1, "Paquímetro universal", 112233, 1222333,  "Martelos e machados", "75-100", "mm", 2.43, "mm", "Martelos wakanda");
+call cadastrarInstrumento(1, 556, 1, "Paquímetro universal", 112233, 1222333,  "Martelos e machados", "75-100", "mm", 2.43, "mm", "Martelos wakanda", "medio");
 
 
 -- alteraçao de instrumentos
@@ -368,7 +369,8 @@ CREATE PROCEDURE modificarInstrumento(
     IN alterarFaixaNominalUnidade enum('mm', 'pol'),
     IN alterarDivisaoNum decimal(4,2),
     IN alterarDivisaoUni enum('mm', 'pol'),
-    IN alterarOrgao varchar(60)
+    IN alterarOrgao varchar(60),
+	IN alterarEmbalagem enum("ruim", "medio", "bom")
 )
 BEGIN
     UPDATE instrumentos
@@ -382,11 +384,13 @@ BEGIN
     faixaNominalNum = alterarFaixaNominalNum,
     faixaNominalUni = alterarFaixaNominalUnidade,
     divisaoResolucaoNum = alterarDivisaoNum,
-    divisaoResolucaoUni = alterarDivisaoUni
+    divisaoResolucaoUni = alterarDivisaoUni,
+	orgaoResponsavel = alterarOrgao,
+	estadoEmbalagem = alterarEmbalagem
     WHERE pk_idinstrumento = idInstrumento;
 END //
 DELIMITER ;
-call modificarInstrumento(1, 1, 556, 1, "Paquímetro cromado", 112233, 111232, "Machados e Martelos", "25-50", "pol", 5.32, "mm", "Martelos Stark");
+call modificarInstrumento(1, 1, 556, 1, "Paquímetro cromado", 112233, 111232, "Machados e Martelos", "25-50", "pol", 5.32, "mm", "Martelos Stark", "ruim");
 
 
 -- retornar informações de instrumento
@@ -404,17 +408,18 @@ CREATE PROCEDURE infosInstrumento(
     OUT infoFaixaNominalUni ENUM('mm', 'pol'),
     OUT infoDivisaoResolucaoNum DECIMAL(4,2),
     OUT infoDivisaoResolucaoUni ENUM('mm', 'pol'),
-    OUT infoOrgaoResponsavel VARCHAR(60)
+    OUT infoOrgaoResponsavel VARCHAR(60),
+	OUT infoEmbalagem enum("ruim", "medio", "bom")
 )
 BEGIN
-    SELECT fk_idCliente, fk_idOs, fk_idCategoria, nome, nSerie, identificacaoCliente, fabricante, faixaNominalNum, faixaNominalUni, divisaoResolucaoNum, divisaoResolucaoUni, orgaoResponsavel
-    INTO idCliente, idOs, idCategoria, infoNome, infoNSerie, infoIdentificacaoCliente, infoFabricante, infoFaixaNominalNum, infoFaixaNominalUni, infoDivisaoResolucaoNum, infoDivisaoResolucaoUni, infoOrgaoResponsavel
+    SELECT fk_idCliente, fk_idOs, fk_idCategoria, nome, nSerie, identificacaoCliente, fabricante, faixaNominalNum, faixaNominalUni, divisaoResolucaoNum, divisaoResolucaoUni, orgaoResponsavel, estadoEmbalagem
+    INTO idCliente, idOs, idCategoria, infoNome, infoNSerie, infoIdentificacaoCliente, infoFabricante, infoFaixaNominalNum, infoFaixaNominalUni, infoDivisaoResolucaoNum, infoDivisaoResolucaoUni, infoOrgaoResponsavel, infoEmbalagem
     FROM instrumentos
     WHERE pk_idInstrumento = idInstrumento;
 END//
 DELIMITER ;
-CALL infosInstrumento(1, @fk_idCliente, @fk_idOs, @fk_idCategoria, @nome, @nSerie, @identificacaoCliente, @fabricante, @faixaNominalNum, @faixaNominalUni, @divisaoResolucaoNum, @divisaoResolucaoUni, @orgaoResponsavel);
-SELECT @fk_idCliente AS fk_idCliente, @fk_idOs AS fk_idOs, @fk_idCategoria AS Categoria, @nome AS Instruemnto, @nSerie AS nSerie, @identificacaoCliente AS identificacaoCliente, @fabricante AS fabricante, @faixaNominalNum AS faixaNominalNum, @faixaNominalUni AS faixaNominalUni, @divisaoResolucaoNum AS divisaoResolucaoNum, @divisaoResolucaoUni AS divisaoResolucaoUni, @orgaoResponsavel AS orgaoResponsavel;
+CALL infosInstrumento(1, @fk_idCliente, @fk_idOs, @fk_idCategoria, @nome, @nSerie, @identificacaoCliente, @fabricante, @faixaNominalNum, @faixaNominalUni, @divisaoResolucaoNum, @divisaoResolucaoUni, @orgaoResponsavel, @estadoEmbalagem);
+SELECT @fk_idCliente AS idCliente, @fk_idOs AS idOs, @fk_idCategoria AS idCategoria, @nome AS infoNome, @nSerie AS infoIdentificacaoCliente, @identificacaoCliente AS infoIdentificacaoCliente, @fabricante AS infoFabricante, @faixaNominalNum AS infoFaixaNominalNum, @faixaNominalUni AS infoFaixaNominalUni, @divisaoResolucaoNum AS infoDivisaoResolucaoNum, @divisaoResolucaoUni AS infoDivisaoResolucaoUni, @orgaoResponsavel AS infoOrgaoResponsavel, @estadoEmbalagem AS infoEmbalagem;
 
 
 -- inserção de recebidos
@@ -499,8 +504,8 @@ BEGIN
     WHERE os.pk_idOs = idOrdem;
 END // 
 DELIMITER ;
-CALL infosRecebidos(556, @infoTipo, @infoContratante, @infoEmail, @infoTelefone, @infoCliente);
-SELECT @infoTipo AS infoTipo, @infoContratante AS contratante, @infoEmail AS email, @infoTelefone AS telefone, @infoCliente AS Cliente;
+CALL infosRecebidos(556, @tipo, @contratante, @email, @telefone, @cliente);
+SELECT @tipo AS infoTipo, @contratante AS contratante, @email AS email, @telefone AS telefone, @cliente AS Cliente;
 
 
 -- inserção de planeza
