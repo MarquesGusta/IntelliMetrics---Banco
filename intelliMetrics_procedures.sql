@@ -90,7 +90,7 @@ BEGIN
     WHERE pk_idUsuario = idUsuario;
 END//
 DELIMITER ;
-call infosUsuario(2, @nome, @email, @cargo, @status);
+call infosUsuario(1, @nome, @email, @cargo, @status);
 SELECT @nome AS nomeUsuario, @email AS emailUsuario, @cargo AS cargoUsuario, @status AS statusUsuario;
 
 
@@ -391,7 +391,7 @@ BEGIN
 END //
 DELIMITER ;
 call modificarInstrumento(1, 1, 556, 1, "Paquímetro cromado", 112233, 111232, "Machados e Martelos", "25-50", "pol", 5.32, "mm", "Martelos Stark", "ruim");
-
+select * from instrumentos;
 
 -- retornar informações de instrumento
 DELIMITER //
@@ -1344,15 +1344,16 @@ CREATE PROCEDURE cadastrarPeca (
     IN novoNome varchar(60),
     IN novoMaterial varchar(60),
     IN novoNDesenho int,
-    IN novaDescricao varchar(300)
+    IN novaDescricao varchar(300),
+    IN novaEmbalagem enum("ruim", "medio", "bom")
 )
 BEGIN
-    INSERT INTO pecas (fk_idOs, fk_idCliente, nome, material, nDesenho, descricao)
-    VALUES (idOs, idCliente, novoNome, novoMaterial, novoNDesenho, novaDescricao);
+    INSERT INTO pecas (fk_idOs, fk_idCliente, nome, material, nDesenho, descricao, estadoEmbalagem)
+    VALUES (idOs, idCliente, novoNome, novoMaterial, novoNDesenho, novaDescricao, novaEmbalagem);
 END //
 DELIMITER ;
-call cadastrarPeca(665, 1, 'Paraconfuso', 'Ferro', 12345, 'Parafuso ta torto para a esquerda, naquele pique');
-call cadastrarPeca(665, 1, 'Prego macaco', 'Aço inox', 54321, 'Prego macaco não ta perfurando a madeira direito');
+call cadastrarPeca(665, 1, 'Paraconfuso', 'Ferro', 12345, 'Parafuso ta torto para a esquerda, naquele pique', "ruim");
+call cadastrarPeca(665, 1, 'Prego macaco', 'Aço inox', 54321, 'Prego macaco não ta perfurando a madeira direito', "medio");
 
 
 -- alteraçao de peças
@@ -1364,7 +1365,8 @@ CREATE PROCEDURE alterarPeca (
     IN alterarNome varchar(60),
     IN alterarMaterial varchar(60),
     IN alterarNDesenho int,
-    IN alterarDescricao varchar(300)
+    IN alterarDescricao varchar(300),
+    IN alterarEmbalagem enum("ruim", "medio", "bom")
 )
 BEGIN
     UPDATE pecas
@@ -1373,11 +1375,12 @@ BEGIN
     nome = alterarNome,
     material = alterarMaterial,
     nDesenho = alterarNDesenho,
-    descricao = alterarDescricao
+    descricao = alterarDescricao,
+    estadoEmbalagem = alterarEmbalagem
     WHERE pk_idPeca = idPeca;
 END //
 DELIMITER ;
-call alterarPeca(1, 665, 1, 'Parafuso', 'Metal', 12345, 'Parafuso ta torto');
+call alterarPeca(1, 665, 1, 'Parafuso', 'Metal', 12345, 'Parafuso ta torto', "bom");
 
 
 -- visualização das peças
@@ -1389,17 +1392,18 @@ CREATE PROCEDURE infosPeca(
     OUT infoNome varchar(60),
 	OUT infoMaterial varchar(60),
     OUT infonDesenho int,
-    OUT infoDescricao varchar(300)
+    OUT infoDescricao varchar(300),
+    OUT infoEmbalagem enum("ruim", "medio", "bom")
 )
 BEGIN
-	SELECT fk_idOs, fk_idCliente, nome, material, nDesenho, descricao
-    INTO idOrdem, idCliente, infoNome, infoMaterial, infonDesenho, infoDescricao
+	SELECT fk_idOs, fk_idCliente, nome, material, nDesenho, descricao, estadoEmbalagem
+    INTO idOrdem, idCliente, infoNome, infoMaterial, infonDesenho, infoDescricao, infoEmbalagem
     FROM pecas
     WHERE pk_idPeca = idPeca;
 END //
 DELIMITER ;
-call infosPeca(1, @idOrdem, @idCliente, @infoNome, @infoMaterial, @infonDesenho, @infoDescricao);
-SELECT @idOrdem AS OrdemDeServiço, @idCliente AS Cliente, @infoNome AS Peça, @infoMaterial AS Material, @infonDesenho AS NumDesenho, @infoDescricao AS Descrição;
+call infosPeca(1, @idOrdem, @idCliente, @infoNome, @infoMaterial, @infonDesenho, @infoDescricao, @infoEmbalagem);
+SELECT @idOrdem AS OrdemDeServiço, @idCliente AS Cliente, @infoNome AS Peça, @infoMaterial AS Material, @infonDesenho AS NumDesenho, @infoDescricao AS Descrição, @infoEmbalagem AS estadoEmbalagem;
 
 
 -- criação de relatório
