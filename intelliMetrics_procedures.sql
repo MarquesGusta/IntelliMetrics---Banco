@@ -94,6 +94,28 @@ call infosUsuario(1, @nome, @email, @cargo, @status);
 SELECT @nome AS nomeUsuario, @email AS emailUsuario, @cargo AS cargoUsuario, @status AS statusUsuario;
 
 
+-- view para trazer as senhas dos usuarios
+CREATE VIEW compararSenhas AS
+SELECT senha, email
+FROM usuarios;
+select * from compararSenhas;
+
+
+-- procedure para definir o token
+DELIMITER //
+CREATE PROCEDURE inserirToken(
+	IN emailUsuario varchar(60),
+	IN novoToken varchar(150)
+)
+BEGIN
+	UPDATE usuarios
+    SET token = novoToken
+    WHERE email = emailUsuario;
+END //
+DELIMITER ;
+call inserirToken("theuzinapalaum@gmail.com", "sei nao bro");
+
+
 -- criação de cliente
 DELIMITER //
 CREATE PROCEDURE criarCliente(
