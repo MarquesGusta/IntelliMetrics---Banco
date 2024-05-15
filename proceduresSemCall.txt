@@ -85,6 +85,26 @@ END//
 DELIMITER ;
 
 
+-- view para trazer as senhas dos usuarios
+CREATE VIEW compararSenhas AS
+SELECT senha, email
+FROM usuarios;
+
+
+-- procedure para definir o token
+DELIMITER //
+CREATE PROCEDURE inserirToken(
+	IN emailUsuario varchar(60),
+	IN novoToken varchar(150)
+)
+BEGIN
+	UPDATE usuarios
+    SET token = novoToken
+    WHERE email = emailUsuario;
+END //
+DELIMITER ;
+
+
 -- criação de cliente
 DELIMITER //
 CREATE PROCEDURE criarCliente(
