@@ -8,7 +8,7 @@ CREATE TABLE usuarios(
 	pk_idUsuario int PRIMARY KEY AUTO_INCREMENT,
     nome varchar(60) NOT NULL,
     email varchar(60) NOT NULL UNIQUE,
-    senha varchar(20) NOT NULL DEFAULT "Suiclab123",
+    senha varchar(150) NOT NULL DEFAULT "Suiclab123",
     cargo enum("gestor", "tecnico") NOT NULL,
     status enum("ativo", "inativo") NOT NULL DEFAULT "ativo",
 	token varchar(150) UNIQUE
