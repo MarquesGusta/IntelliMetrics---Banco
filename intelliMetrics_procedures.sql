@@ -105,7 +105,7 @@ select * from compararSenhas;
 DELIMITER //
 CREATE PROCEDURE inserirToken(
 	IN emailUsuario varchar(60),
-	IN novoToken varchar(150)
+	IN novoToken varchar(300)
 )
 BEGIN
 	UPDATE usuarios
