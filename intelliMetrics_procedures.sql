@@ -18,7 +18,7 @@ call criarUsuario("Julia Paxeco", "xulinhagamerm@gmail.com", "gestor");
 DELIMITER //
 CREATE PROCEDURE redefinirSenha(
 	IN emailUsuario varchar(60),
-	IN novaSenha varchar(20)
+	IN novaSenha varchar(150)
 )
 BEGIN
 	UPDATE usuarios
