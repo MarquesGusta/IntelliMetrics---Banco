@@ -11,7 +11,7 @@ CREATE TABLE usuarios(
     senha varchar(150) NOT NULL DEFAULT "Suiclab123",
     cargo enum("gestor", "tecnico") NOT NULL,
     status enum("ativo", "inativo") NOT NULL DEFAULT "ativo",
-	token varchar(150) UNIQUE
+	token varchar(300) UNIQUE
 );
 
 CREATE TABLE clientes(
